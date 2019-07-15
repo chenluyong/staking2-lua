@@ -1,0 +1,1 @@
+Staking2 API
