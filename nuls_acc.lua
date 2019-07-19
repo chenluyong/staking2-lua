@@ -1,6 +1,10 @@
 
 local cjson = require "cjson"
 local redis = require "resty.redis"
+local base58 = require("resty.base58")
+local bit = require("bit")
+local http = require "resty.http"
+local httpc = http.new()
 
 local args = ngx.req.get_uri_args()
 local rds = redis:new()
@@ -34,6 +38,62 @@ local RET = {}
   --}
 -- }
 NULSCAN_GETACCOUNT = "https://api.nuls.io"
+ADDRESS_LENGTH = 32
+CHAINID = 8964
+ACCOUNT_TYPE = 1
+
+function hex_dump (str)
+    local len = string.len( str )
+    local dump = ""
+    local hex = ""
+    local asc = ""
+
+    for i = 1, len do
+        if 1 == i % 8 then
+            dump = dump .. hex .. asc .. "\n"
+            hex = string.format( "%04x: ", i - 1 )
+            asc = ""
+        end
+
+        --TODO check XOR https://github.com/nuls-io/nuls/blob/master/core-module/kernel/src/main/java/io/nuls/kernel/utils/AddressTool.java#L169
+        local ord = string.byte( str, i )
+        hex = hex .. string.format( "%02x ", ord )
+        if ord >= 32 and ord <= 126 then
+            asc = asc .. string.char( ord )
+        else
+            asc = asc .. "."
+        end
+    end
+
+
+    return dump .. hex
+    .. string.rep( "   ", 8 - len % 8 ) .. asc
+end
+
+function validate_address(addr)
+    local addr = addr
+
+    if addr == '' or string.len(addr) ~= ADDRESS_LENGTH then
+        return nil
+    end
+
+    local bytes, err = base58.decode(addr)
+    if not bytes then
+        return nil
+    end
+
+    --local chainId = string.byte(bytes, 1)
+    local low = bit.lshift(bit.tobit(string.byte(bytes, 2)), 8)
+    local high = bit.band(bit.tobit(string.byte(bytes, 1)), 0xff)
+    local chainId = bit.bor(low, high)
+    local accType = string.byte(bytes, 3)
+
+    if chainId == CHAINID and accType == ACCOUNT_TYPE then
+        return true
+    end
+
+    return false
+end
 
 local ok, err = rds:connect("127.0.0.1", 6379)
 if not ok then
@@ -55,9 +115,6 @@ if not ok then
 elseif ok == ngx.null then
     log(ERR, "nuls address " .. addr .. " not found in rds")
     --request from nulscan.com
-    http = require "resty.http"
-    httpc = http.new()
-
     local res, err = httpc:request_uri(NULSCAN_GETACCOUNT, {
         method = "POST",
         headers = {
@@ -87,12 +144,19 @@ elseif ok == ngx.null then
 
     local ret = cjson.decode(res.body)
     if ret and ret.error then
-        if ret.error.code == 1000 then
+        if not validate_address(addr) then
             RET.exist = false
-            RET.error = ret.error.data
+            RET.error = ret.error.message
+        else
+            --the address is validated, but no tx on chain yet.
+            RET.exist = false
+            RET.balance = 0
+            RET.pledged = false
         end
     else
-        RET.balance = ret.result.totalBalance / 100000000
+        RET.balanceTotal = ret.result.totalBalance / 100000000
+        RET.balanceLocking = (ret.result.consensusLock + ret.result.timeLock) / 100000000
+        RET.balanceUsable = ret.result.balance / 100000000
         if ret.result.consensusLock > 0 then
             RET.pledged = true
         else
@@ -119,13 +183,15 @@ elseif ok == ngx.null then
         end
     end
 
-    ok, err = rds:set('nuls:account:'..addr, cjson.encode(RET))
-    if not ok then
-        log(ERR, "save result to redis failed: "..err)
-    end
-    ok, err = rds:expire('nuls:account:'..addr, 300)
-    if not ok then
-        log(ERR, "set key expire failed")
+    if not RET.error then
+        ok, err = rds:set('nuls:account:'..addr, cjson.encode(RET))
+        if not ok then
+            log(ERR, "save result to redis failed: "..err)
+        end
+        ok, err = rds:expire('nuls:account:'..addr, 300)
+        if not ok then
+            log(ERR, "set key expire failed")
+        end
     end
 
     RET.status = 0
@@ -141,3 +207,4 @@ if not ok then
 end
 
 ngx.say(cjson.encode(RET))
+
