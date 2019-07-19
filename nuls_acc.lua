@@ -151,9 +151,13 @@ elseif ok == ngx.null then
             --the address is validated, but no tx on chain yet.
             RET.exist = false
             RET.balance = 0
+            RET.balanceTotal = 0
+            RET.balanceLocking = 0
+            RET.balanceUsable = 0
             RET.pledged = false
         end
     else
+        RET.balance = ret.result.totalBalance / 100000000
         RET.balanceTotal = ret.result.totalBalance / 100000000
         RET.balanceLocking = (ret.result.consensusLock + ret.result.timeLock) / 100000000
         RET.balanceUsable = ret.result.balance / 100000000
