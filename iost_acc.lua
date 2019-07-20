@@ -49,7 +49,7 @@ elseif ok == ngx.null then
         return
     end
 
-    --log(ERR, ">>response: ".. res.status .. " " .. res.body)
+    log(ERR, ">>response: ".. res.status .. " " .. res.body)
 
     if res.status ~= 200 then
         RET.exist = false
@@ -60,12 +60,31 @@ elseif ok == ngx.null then
 
     local ret = cjson.decode(res.body)
     if ret and ret.name then
-        RET.balance = ret.balance
+        local voted = 0
+        local pledged = 0
+
         if table.getn(ret.vote_infos) > 0 then
             RET.pledged = true
         else
             RET.pledged = false
         end
+
+        if #ret.vote_infos >= 1 then
+            for _, vote in pairs(ret.vote_infos) do
+                if vote.votes then voted = voted + vote.votes end
+            end
+        end
+        if #ret.gas_info.pledged_info >= 1 then
+            for _, pledge in pairs(ret.gas_info.pledged_info) do
+                if pledge.amount then pledged = pledged + pledge.amount end
+            end
+        end
+
+        RET.balanceUsable = ret.balance
+        RET.balanceLocking = voted
+        RET.balanceTotal = RET.balanceLocking + RET.balanceUsable + pledged
+        RET.balance = RET.balanceTotal
+
     end
 
     ok, err = rds:set('iost:account:'..acc, cjson.encode(RET))
