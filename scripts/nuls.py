@@ -87,7 +87,7 @@ class NodesYield(NodesInfo):
 
 def main():
     reward = NodesYield()
-    print(reward.calcYield())
+    print(json.dumps(reward.calcYield()))
 
 
 if __name__ == "__main__":
