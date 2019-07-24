@@ -32,7 +32,6 @@ class NulsRpc:
 
     def __get(self, uri, params = None):
         url = self.nodeApi+uri
-        print(">> request: %s" % url)
         res = requests.get(url=url, params=params).text
         return json.loads(res)
 
@@ -87,7 +86,6 @@ class NodesYield(NodesInfo):
         return nodes
 
 def main():
-    print(">>start")
     reward = NodesYield()
     print(reward.calcYield())
 
