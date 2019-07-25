@@ -6,6 +6,8 @@ local args = ngx.req.get_uri_args()
 local rds = redis:new()
 rds:set_timeout(1000)
 
+local const = require "constant"
+
 local log = ngx.log
 local ERR = ngx.ERR
 
@@ -39,9 +41,7 @@ elseif ok == ngx.null then
 
     local res, err = httpc:request_uri( string.format("%s/%s/0", IOSTABC_GETACCOUNT, acc), {
         method = "GET",
-        headers = {
-            ['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36'
-        }
+        headers = const.CAMO_UA
     })
 
     if not res then

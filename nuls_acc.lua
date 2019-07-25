@@ -10,6 +10,8 @@ local args = ngx.req.get_uri_args()
 local rds = redis:new()
 rds:set_timeout(1000)
 
+local const = require "constant"
+
 local log = ngx.log
 local ERR = ngx.ERR
 
@@ -117,9 +119,7 @@ elseif ok == ngx.null then
     --request from nulscan.com
     local res, err = httpc:request_uri(NULSCAN_GETACCOUNT, {
         method = "POST",
-        headers = {
-            ['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36'
-        },
+        headers = const.CAMO_UA,
         body = cjson.encode({
             jsonrpc = "2.0",
             method = "getAccount",
@@ -167,9 +167,7 @@ elseif ok == ngx.null then
             RET.pledged = false
             local res, err = httpc:request_uri(NULSCAN_GETACCOUNT, {
                 method = "POST",
-                headers = {
-                    ['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36'
-                },
+                headers = const.CAMO_UA,
                 body = cjson.encode({
                     jsonrpc = "2.0",
                     method = "getAccountTxs",

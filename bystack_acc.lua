@@ -6,6 +6,8 @@ local bit = require("bit")
 local http = require "resty.http"
 local httpc = http.new()
 
+local const = require "constant"
+
 local args = ngx.req.get_uri_args()
 local rds = redis:new()
 rds:set_timeout(1000)
@@ -16,7 +18,6 @@ local ERR = ngx.ERR
 local RET = {}
 
 --http://vapor.blockmeta.com/api/v1/address/vp1qcj7dzpjlnsg7pf24nj6pduar9dc24uxe8ywc9
-CAMO_UA = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36'
 BYSTACK_RPC = "http://127.0.0.1:9889/"
 BYSTACK_GETACCOUNT = "http://vapor.blockmeta.com/api/v1/address/"
 BYSTACK_GETTXS_PREFIX = "/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?limit=100"
@@ -59,12 +60,10 @@ function validate_address(addr)
 
     local res, err = httpc:request_uri(BYSTACK_RPC..'validate-address', {
         method = "POST",
-        headers = {
-            ['User-Agent'] = CAMO_UA,
-            body = cjson.encode({
-                address = addr,
-            })
-        }
+        headers = const.CAMO_UA,
+        body = cjson.encode({
+            address = addr,
+        })
     })
 
     if res and res.status == "success" then
@@ -98,9 +97,7 @@ elseif ok == ngx.null then
     log(ERR, "bystack address " .. addr .. " not found in rds")
     local res, err = httpc:request_uri(BYSTACK_GETACCOUNT..addr, {
         method = "GET",
-        headers = {
-            ['User-Agent'] = CAMO_UA
-        }
+        headers = const.CAMO_UA,
     })
 
     if not res then
@@ -139,9 +136,7 @@ elseif ok == ngx.null then
         local url = string.format("%s%s%s", BYSTACK_GETACCOUNT, addr, BYSTACK_GETTXS_PREFIX)
         local res, err = httpc:request_uri(url, {
             method = "GET",
-            headers = {
-                ['User-Agent'] = CAMO_UA
-            }
+            headers = const.CAMO_UA
         })
 
         if not res then
