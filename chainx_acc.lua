@@ -5,7 +5,8 @@ local base58 = require("resty.base58")
 local args = ngx.req.get_uri_args()
 local log = ngx.log
 local ERR = ngx.ERR
-local RET = { status : 1, error : "unkonw error." }
+RET = {}
+--RET = { status : 1, error : "unkonw error." }
 
 
 CHAINX_GETACCOUNT = "https://api.chainx.org.cn/account"
@@ -32,7 +33,7 @@ local request_url = string.format("%s/0x%s/balance", CHAINX_GETACCOUNT, adr)
 local chainx_py = "/usr/local/openresty/nginx/conf/staking2/scripts/chainx.py"
 
 -- request account info
-local cmd = string.format("%s %s 0x%s",python_pwd, d_request, addr)
+local cmd = string.format("%s %s 0x%s",chainx_py, request_url, adr)
 local t = io.popen(cmd)
 local a = t:read("*all")
 RET = a
