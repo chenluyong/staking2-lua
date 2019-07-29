@@ -15,7 +15,7 @@ def find_PCX(params):
 def main():
     RET = {}
     try:
-        r = requests.get(sys.argv[1])
+        r = requests.get(sys.argv[1], headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'})
         r = find_PCX(r.json())
 
         if r is not None:
