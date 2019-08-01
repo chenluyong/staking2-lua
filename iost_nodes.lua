@@ -101,7 +101,7 @@ end
 
 
 -- logic
-RET = get_produccers(acc)
+RET = get_producers(acc)
 
 -- response
 ngx.header.content_type = 'application/json'
