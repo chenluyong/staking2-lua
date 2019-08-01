@@ -112,7 +112,7 @@ end
 
 ok, err = rds:get('nuls:account:'..addr)
 if not ok then
-    log(ERR, "get nuls from rds failed: "..err)
+    log(ERR, "get nuls address from rds failed: "..err)
     RET.error = "internal error: rfailed."
 elseif ok == ngx.null then
     log(ERR, "nuls address " .. addr .. " not found in rds")
