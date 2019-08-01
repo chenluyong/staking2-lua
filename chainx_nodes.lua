@@ -97,7 +97,7 @@ if not ok then
     local nominator = {}
     local ok, err = rds:smembers('chainx:nodeNominator')
     if not ok then
-        log(ERR, "chainx node nominator not found in redis: ", err)
+        util.log("chainx node nominator not found in redis: ", err)
     else
         for _, nodeNominator in pairs(ok) do
             local _, _, id, voter = string.find(nodeNominator, "(%w+):(%d+)")
@@ -120,11 +120,11 @@ if not ok then
     if not RET.error then
         ok, err = rds:set('chainx:nodes', cjson.encode(RET))
         if not ok then
-            log(ERR, "save result to redis failed: "..err)
+            util.log("save result to redis failed: "..err)
         end
         ok, err = rds:expire('chainx:nodes:', 3600)
         if not ok then
-            log(ERR, "set key expire failed")
+            util.log("set key expire failed")
         end
     end
 else
