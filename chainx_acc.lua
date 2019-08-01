@@ -34,27 +34,37 @@ local function bin2hex(s)
     return s
 end
 
+local ok, err = pcall(function()
+    -- get parms
+    local acc = args.acc
+    if not acc then
+        log(ERR, "ERR not chainx account provided.")
+        ngx.say(cjson.encode({status = 1, error = "missing arguments"}))
+        return
+    end
+    local adr_check = bin2hex(base58.decode(acc))
+    local adr = string.sub(adr_check, 3, string.len(adr_check)-4)
+    local request_url = string.format("%s/0x%s/balance", CHAINX_GETACCOUNT, adr)
 
--- get parms
-local acc = args.acc
-if not acc then
-    log(ERR, "ERR not chainx account provided.")
-    ngx.say(cjson.encode({status = 1, error = "missing arguments"}))
+    -- python script
+    local chainx_py = "/usr/local/openresty/nginx/conf/staking2/scripts/chainx.py"
+
+    -- request account info
+    local cmd = string.format("%s %s 0x%s",chainx_py, request_url, adr)
+    local t = io.popen(cmd)
+    local a = t:read("*all")
+    RET = a
+
+    -- response
+    ngx.header.content_type = 'application/json'
+    ngx.say(RET)
+    return
+end)
+
+if not ok then
+    RET.error = "unknown error."
+    log(ERR, err)
+    RET.status = 1
+    ngx.say(cjson.encode(RET))
     return
 end
-local adr_check = bin2hex(base58.decode(acc))
-local adr = string.sub(adr_check, 3, string.len(adr_check)-4)
-local request_url = string.format("%s/0x%s/balance", CHAINX_GETACCOUNT, adr)
-
--- python script
-local chainx_py = "/usr/local/openresty/nginx/conf/staking2/scripts/chainx.py"
-
--- request account info
-local cmd = string.format("%s %s 0x%s",chainx_py, request_url, adr)
-local t = io.popen(cmd)
-local a = t:read("*all")
-RET = a
-
--- response
-ngx.header.content_type = 'application/json'
-ngx.say(RET)

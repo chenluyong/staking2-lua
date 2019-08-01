@@ -101,7 +101,17 @@ end
 
 
 -- logic
-RET = get_producers(acc)
+local ok, err = pcall(function()
+    RET = get_producers(acc)
+end)
+
+
+if not ok then
+    RET.error = "unknown error."
+    log(ERR, err)
+    RET.status = 1
+end
+
 
 -- response
 ngx.header.content_type = 'application/json'
