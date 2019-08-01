@@ -6,6 +6,9 @@ local http = require "resty.ihttp"
 local httpc = http:new()
 local util = require "util"
 
+local string = string
+local table = table
+
 local CHAINX_DECIMAL = 100000000
 
 local CHAINX_RPC = "http://127.0.0.1:8081/chainx/"
@@ -91,9 +94,27 @@ if not ok then
         end
     end
 
+    local nominator = {}
+    local ok, err = rds:smembers('chainx:nodeNominator')
+    if not ok then
+        log(ERR, "chainx node nominator not found in redis: ", err)
+    else
+        for _, nodeNominator in pairs(ok) do
+            local _, _, id, voter = string.find(nodeNominator, "(%w+):(%d+)")
+            if id and voter then
+                nominator[id] = voter
+            end
+        end
+    end
+
     for _, nodeinfo in pairs(RET) do
         local userYield = 1 / totalPower * 14400 * 0.9 * 0.8 * 365
         nodeinfo.userYield = tonumber(string.format("%.4f", userYield))
+        if nominator[nodeinfo.accountId] then
+            nodeinfo.voter = nominator[nodeinfo.accountId]
+        else
+            util.log(string.format("> node %s[%s] voter was missing", nodeinfo.name, nodeinfo.accountId))
+        end
     end
 
     if not RET.error then

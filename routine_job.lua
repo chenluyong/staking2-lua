@@ -40,7 +40,7 @@ local function chainxGetNominationCount(pub)
         util.log("query node ", info.accountId, " info failed: ", err)
     else
         local voteinfo = cjson.decode(res)
-        util.log("node: ", pub, ", nominator: ", voteinfo.total)
+        --util.log("node: ", pub, ", nominator: ", voteinfo.total)
         return voteinfo.total
     end
     return 0
@@ -49,29 +49,30 @@ end
 local function check_interval(rdskey, interval)
     local ok, err = rds:get(rdskey)
     if not ok then
-        util.log("routine job check interval failed: ", rdskey)
-        -- initial new crawler timestamp if not found.
+        util.log("no routine job update flag, create one: ", rdskey)
         local ok, err = rds:set('chainx:crawler:update', os.time())
         if not ok then
             util.log('update chainx crawler timer failed: ', err)
         end
+        return true -- initial run
     else
-        if os.time() - ok > interval then
+        if os.time() - tonumber(ok) > interval then
             return true
         end
     end
     return false
 end
 
-local function jgb_chainx_crawler()
+local function job_chainx_crawler()
     if check_interval('chainx:crawler:update', 3000) then
+        util.log("[ROUTINE] chainx crawler start")
         local ok, err = rds:get('chainx:nodes')
         if ok then
             local nodeNominator = {}
             local cnt = 0
             for _, info in pairs(cjson.decode(ok)) do
                 local nominator = chainxGetNominationCount((string.format("0x%s", info.accountId)))
-                table.insert(nodeNominator, string.format("%s:%d", pub, nominator))
+                table.insert(nodeNominator, string.format("%s:%d", info.accountId, nominator))
                 cnt = cnt + 1
             end
             if tonumber(#nodeNominator) == tonumber(cnt) then
@@ -86,7 +87,10 @@ local function jgb_chainx_crawler()
             if not ok then
                 util.log('update chainx crawler timer failed: ', err)
             end
+        else
+            util.log('[ROUTINE] chainx nodes info not found in redis.')
         end
+        util.log('[ROUTINE] chainx crawler finished.')
     end
 end
 
