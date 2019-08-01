@@ -1,11 +1,28 @@
--- chainx
+--[[ 
+[chainx account example]
+- request url: http://192.168.1.93/chainx/getaccount?acc=5VLFvns2zgpJGFjz6ob5U3Vbomy71aHrM3ieVH5MNTPpeyzB
+- return body: 
+{
+    "balanceTotal":1.600473,
+    "balance":1.600473, -- the same as `balanceTotal`
+    "status":0,
+    "balanceLocking":0,
+    "account":"0xfbdc9c53d8ebc2f2a00636cf4cc9b5f50fb0415bb1058c194ff9c9c148369371",
+    "balanceUsable":1.600473,
+    "pledged":false
+}
+]]--
+
+
+
+
 local cjson = require "cjson"
 local base58 = require("resty.base58")
 
 local args = ngx.req.get_uri_args()
 local log = ngx.log
 local ERR = ngx.ERR
-RET = {}
+local RET = {}
 --RET = { status : 1, error : "unkonw error." }
 
 
