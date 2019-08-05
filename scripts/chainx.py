@@ -20,20 +20,23 @@ def main():
 
         if r is not None:
             RET["balance"] = (r["Free"] + r["ReservedStaking"]) / 100000000
-            RET["balanceTotal"] = RET["balance"]
             RET["balanceLocking"] = r["ReservedStaking"] / 100000000
             RET["balanceUsable"] = r["Free"] / 100000000
-            RET["status"] = 0
-            RET["account"] = sys.argv[2]
-            if RET["balanceLocking"] > 0:
-                RET["pledged"] = True
-            else:
-                RET["pledged"] = False
         else:
-            RET = {"status": "1", "error": "account not find"}
+            RET["balance"] = 0
+            RET["balanceLocking"] = 0 
+            RET["balanceUsable"] = 0
     except Exception as e:
         RET = {"status": "1", "error": e}
     finally:
+        RET["status"] = 0
+        RET["balanceTotal"] = RET["balance"]
+        RET["account"] = sys.argv[2]
+        if RET["balanceLocking"] > 0:
+            RET["pledged"] = True
+        else:
+            RET["pledged"] = False
+
         print(json.dumps(RET))
 
 if __name__ == "__main__":

@@ -37,14 +37,24 @@ end
 local ok, err = pcall(function()
     -- get parms
     local acc = args.acc
+
     if not acc then
         log(ERR, "ERR not chainx account provided.")
         ngx.say(cjson.encode({status = 1, error = "missing arguments"}))
         return
     end
+
     local adr_check = bin2hex(base58.decode(acc))
     local adr = string.sub(adr_check, 3, string.len(adr_check)-4)
     local request_url = string.format("%s/0x%s/balance", CHAINX_GETACCOUNT, adr)
+
+    if ( #adr ~= 64 ) then
+        RET.error = "address format error."
+        RET.status = 1
+        ngx.say(cjson.encode(RET))
+        return
+    end
+
 
     -- python script
     local chainx_py = "/usr/local/openresty/nginx/conf/staking2/scripts/chainx.py"
