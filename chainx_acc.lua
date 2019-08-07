@@ -31,7 +31,7 @@ RET.status = 1
 rds:set_timeout(1000)
 
 -- local ip
-local rds_ip = 127.0.0.1
+local rds_ip = "127.0.0.1"
 if DEBUG then
     rds_ip = "192.168.1.93"
 end
@@ -51,9 +51,8 @@ local function rds_set(k, v)
     local ok, err = rds:set(k, v)
     if ok then
         rds:expire(k, 3600)
-    else
-        return
     end
+    return
 end
 
 local function rds_get(k)
