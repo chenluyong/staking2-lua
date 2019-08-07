@@ -14,19 +14,32 @@
 ]]--
 
 
-
-
 local cjson = require "cjson"
 local base58 = require("resty.base58")
+local redis = require "resty.redis"
 
+local rds = redis:new()
 local args = ngx.req.get_uri_args()
 local log = ngx.log
 local ERR = ngx.ERR
 local RET = {}
---RET = { status : 1, error : "unkonw error." }
+local CHAINX_GETACCOUNT = "https://api.chainx.org.cn/account"
+local DEBUG = false 
 
+RET.status = 1
 
-CHAINX_GETACCOUNT = "https://api.chainx.org.cn/account"
+rds:set_timeout(1000)
+
+-- local ip
+local rds_ip = 127.0.0.1
+if DEBUG then
+    rds_ip = "192.168.1.93"
+end
+-- connect redis
+local ok, err = rds:connect(rds_ip, 6379)
+if not ok and DEBUG then
+   RET.debug = "failed to connect: "..err
+end
 
 -- define function
 local function bin2hex(s)
@@ -34,27 +47,41 @@ local function bin2hex(s)
     return s
 end
 
-local ok, err = pcall(function()
-    -- get parms
-    local acc = args.acc
-
-    if not acc then
-        log(ERR, "ERR not chainx account provided.")
-        ngx.say(cjson.encode({status = 1, error = "missing arguments"}))
+local function rds_set(k, v)
+    local ok, err = rds:set(k, v)
+    if ok then
+        rds:expire(k, 3600)
+    else
         return
     end
+end
 
+local function rds_get(k)
+    local ok, err = rds:get(k)
+    if not ok then
+        return
+    end
+    return ok 
+end
+
+-- get account info
+local function get_info(acc)
     local adr_check = bin2hex(base58.decode(acc))
     local adr = string.sub(adr_check, 3, string.len(adr_check)-4)
     local request_url = string.format("%s/0x%s/balance", CHAINX_GETACCOUNT, adr)
 
     if ( #adr ~= 64 ) then
-        RET.error = "address format error."
-        RET.status = 1
-        ngx.say(cjson.encode(RET))
-        return
+        return { error = "address format error." } 
     end
-
+    local ok = rds_get("chainx:account:"..adr)
+    if ok ~= ngx.null and ok then
+        local ret = cjson.decode(ok)
+        ret.status = 0
+        if DEBUG then
+            ret.debug = "from redis"
+        end
+        return ret
+    end
 
     -- python script
     local chainx_py = "/usr/local/openresty/nginx/conf/staking2/scripts/chainx.py"
@@ -63,18 +90,37 @@ local ok, err = pcall(function()
     local cmd = string.format("%s %s 0x%s",chainx_py, request_url, adr)
     local t = io.popen(cmd)
     local a = t:read("*all")
-    RET = a
+    rds_set("chainx:account:"..adr, a)
 
-    -- response
-    ngx.header.content_type = 'application/json'
-    ngx.say(RET)
+    return cjson.decode(a)
+end
+
+local ok, err = pcall(function()
+    -- get params
+    local acc = args.acc
+    if not acc then
+        log(ERR, "ERR not chainx account provided.")
+        RET.error = "missing arguments"
+        return
+    end
+    
+    -- get account info
+    local ret_table = get_info(acc) 
+    for k,v in pairs(ret_table) do  
+        RET[k] = v
+    end
     return
 end)
 
 if not ok then
-    RET.error = "unknown error."
+    if DEBUG then
+        RET.error = err
+    else
+        RET.error = "unknown error."
+    end
     log(ERR, err)
-    RET.status = 1
-    ngx.say(cjson.encode(RET))
-    return
 end
+
+-- response
+ngx.header.content_type = 'application/json'
+ngx.say(cjson.encode(RET))
