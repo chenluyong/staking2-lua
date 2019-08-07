@@ -84,7 +84,6 @@ local ok, err = pcall(function()
     if args_len > 3 then
         args = string.sub(ngx.var.request_uri, #ngx.var.uri + 1, #ngx.var.request_uri)
     end
-    ngx.say(args)
     local ret_table = get_producers(args)
 
     -- merge tables
