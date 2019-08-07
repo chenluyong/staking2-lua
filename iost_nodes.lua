@@ -13,7 +13,7 @@ local IOST_NODESINFO = "https://www.iostabc.com/api/producers"
 local RET = {}
 local log = ngx.log
 local ERR = ngx.ERR
-local DEBUG = true 
+local DEBUG = false 
 RET.status = 1
 
 -- local ip
