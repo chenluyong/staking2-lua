@@ -24,7 +24,7 @@ def main():
             RET["balanceUsable"] = r["Free"] / 100000000
         else:
             RET["balance"] = 0
-            RET["balanceLocking"] = 0 
+            RET["balanceLocking"] = 0
             RET["balanceUsable"] = 0
     except Exception as e:
         RET = {"status": "1", "error": e}

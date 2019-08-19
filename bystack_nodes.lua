@@ -54,7 +54,7 @@ elseif ok == ngx.null then
                     name = node.name,
                     introduce = node.introduce,
                     icon = string.format("https://api.bystack.com/supernode/v1%s", node.reserved_1),
-                    --totalVote = node.vote_count,
+                    --totalVote = node.vote_count / 100000000,
                     votePercent = tonumber(string.format("%.4f", node.percent)),
                     commissionFee = 100 - tonumber(string.match(node.reward, "%d+")) .. "%",
                     --nodeAddress = node.reserved_2,
@@ -84,6 +84,7 @@ elseif ok == ngx.null then
                     nodeinfo[name].nodeType = node.type
                     nodeinfo[name].nodeAddress = node.address
                     nodeinfo[name].nodePubKey = node.pub_key
+                    nodeinfo[name].userYield = node.expected_return
                     nodeinfo[name].votePercent = tonumber(string.format("%.4f", node.vote_count / netTotalVote))
                 else
                     log(ERR, ">>name: '"..name.."' not found")
@@ -104,7 +105,7 @@ elseif ok == ngx.null then
         if not ok then
             log(ERR, "save result to redis failed: "..err)
         end
-        ok, err = rds:expire('nuls:account:'..addr, 60)
+        ok, err = rds:expire('bystack:nodes', 3600)
         if not ok then
             log(ERR, "set key bystack:nodes expire failed")
         end
