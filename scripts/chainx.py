@@ -4,6 +4,10 @@ import sys
 import requests
 import json
 
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+ 
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 def find_PCX(params):
     for item in params:
         if item["token"] == "PCX":
@@ -15,7 +19,7 @@ def find_PCX(params):
 def main():
     RET = {}
     try:
-        r = requests.get(sys.argv[1], headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'})
+        r = requests.get(sys.argv[1], headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'},verify=False)
         r = find_PCX(r.json())
 
         if r is not None:
@@ -26,9 +30,7 @@ def main():
             RET["balance"] = 0
             RET["balanceLocking"] = 0
             RET["balanceUsable"] = 0
-    except Exception as e:
-        RET = {"status": "1", "error": e}
-    finally:
+
         RET["status"] = 0
         RET["balanceTotal"] = RET["balance"]
         RET["account"] = sys.argv[2]
@@ -36,8 +38,9 @@ def main():
             RET["pledged"] = True
         else:
             RET["pledged"] = False
-
-        print(json.dumps(RET))
+    except Exception as e:
+        RET = {"status": 1, "error": str(e)}
+    print(json.dumps(RET))
 
 if __name__ == "__main__":
     main()
