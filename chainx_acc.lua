@@ -86,10 +86,15 @@ local function get_info(acc)
     local chainx_py = "/usr/local/openresty/nginx/conf/staking2/scripts/chainx.py"
 
     -- request account info
+    -- demo: /usr/local/openresty/nginx/conf/staking2/scripts/chainx.py https://api.chainx.org.cn/account/0xfbdc9c53d8ebc2f2a00636cf4cc9b5f50fb0415bb1058c194ff9c9c148369371/balance 0xfbdc9c53d8ebc2f2a00636cf4cc9b5f50fb0415bb1058c194ff9c9c148369371
     local cmd = string.format("%s %s 0x%s",chainx_py, request_url, adr)
     local t = io.popen(cmd)
     local a = t:read("*all")
-    rds_set("chainx:account:"..adr, a)
+    if (a.status ~= 0) then
+        log(ERR,a.error)
+    else
+        rds_set("chainx:account:"..adr, a)
+    end
 
     return cjson.decode(a)
 end
