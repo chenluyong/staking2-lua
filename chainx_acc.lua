@@ -90,8 +90,9 @@ local function get_info(acc)
     local cmd = string.format("%s %s 0x%s",chainx_py, request_url, adr)
     local t = io.popen(cmd)
     local a = t:read("*all")
-    if (a.status ~= 0) then
-        log(ERR,a.error)
+    local ret_obj = cjson.decode(a)
+    if (ret_obj["status"] ~= 0) then
+        log(ERR,a)
     else
         rds_set("chainx:account:"..adr, a)
     end
