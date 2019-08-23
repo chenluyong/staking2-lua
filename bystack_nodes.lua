@@ -17,7 +17,7 @@ local RET = {}
 
 -- https://api.bystack.com/supernode/v1/sn-table
 BYSTACK_NODESINFO = "https://api.bystack.com/supernode/v1/sn-table"
-BYSTACK_NODESDETAIL = "http://vapor.blockmeta.com/api/v1/nodes?page=1&limit=200"
+BYSTACK_NODESDETAIL = "https://vapor.blockmeta.com/api/v1/nodes?page=1&limit=200"
 
 local ok, err = rds:connect("127.0.0.1", 6379)
 if not ok then
