@@ -19,7 +19,7 @@ local RET = {}
 
 --http://vapor.blockmeta.com/api/v1/address/vp1qcj7dzpjlnsg7pf24nj6pduar9dc24uxe8ywc9
 BYSTACK_RPC = "http://127.0.0.1:9889/"
-BYSTACK_GETACCOUNT = "http://vapor.blockmeta.com/api/v1/address/"
+BYSTACK_GETACCOUNT = "https://vapor.blockmeta.com/api/v1/address/"
 BYSTACK_GETTXS_PREFIX = "/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?limit=100"
 ADDRESS_LENGTH = 42
 
