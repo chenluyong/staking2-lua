@@ -49,7 +49,7 @@ end
 function _M.new(self, opts)
     opts = opts or {}
     local headers = opts.headers or CAMO_UA
-    local timeout = (opts.timeout and opts.timeout * 1000) or 1000
+    local timeout = (opts.timeout and opts.timeout * 1000) or 3000
 
     for i = 1, #methods do
         local method = methods[i]
