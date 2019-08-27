@@ -43,6 +43,7 @@ local ok, err = rds:get('eosc:account:'..addr)
 if not ok then
     local res, err = httpc:post(EOSC_GETACCOUNT, {
         headers = {['Content-Type'] = 'application/json;charset=UTF-8'},
+        timeout = 5,
         body = cjson.encode({
             account_name = addr
         })
