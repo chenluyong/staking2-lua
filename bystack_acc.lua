@@ -66,8 +66,9 @@ function validate_address(addr)
         })
     })
 
-    if res and res.status == "success" then
-        if res.data.valid == true then
+    local ret = cjson.decode(res.body)
+    if ret and ret.status == "success" then
+        if ret.data.valid == true then
             return true
         end
     end
@@ -121,7 +122,7 @@ elseif ok == ngx.null then
             RET.error = "account don't exist"
         else
             --the address is validated, but no tx on chain yet.
-            RET.exist = false
+            RET.exist = true
             RET.balance = 0
             RET.balanceTotal = 0
             RET.balanceLocking = 0
