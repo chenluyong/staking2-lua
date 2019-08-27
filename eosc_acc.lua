@@ -72,9 +72,19 @@ if not ok then
                 locking = locking + normalize(fixvote.vote)
             end
         end
+        if locking == 0 and tonumber(ret.data.staked) ~= 0 then
+            -- the explorer will calc 'staked' with txs history,
+            -- but not every vote tx will correct record in raw data.
+            -- should be explorer bug.
+            locking = tonumber(ret.data.staked)
+        end
         RET.balanceLocking = locking
         RET.balanceTotal = RET.balanceUsable + RET.balanceLocking
-        RET.pledged = locking == 0 and false or true
+        if locking == 0 then
+            RET.pledged = false
+        else
+            RET.pledged = true
+        end
     end
 
     if not RET.error then
