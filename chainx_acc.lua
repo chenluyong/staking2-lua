@@ -1,7 +1,7 @@
---[[ 
+--[[
 [chainx account example]
 - request url: http://192.168.1.93/chainx/getaccount?acc=5VLFvns2zgpJGFjz6ob5U3Vbomy71aHrM3ieVH5MNTPpeyzB
-- return body: 
+- return body:
 {
     "balanceTotal":1.600473,
     "balance":1.600473, -- the same as `balanceTotal`
@@ -24,7 +24,7 @@ local log = ngx.log
 local ERR = ngx.ERR
 local RET = {}
 local CHAINX_GETACCOUNT = "https://api.chainx.org.cn/account"
-local DEBUG = false 
+local DEBUG = false
 
 RET.status = 1
 
@@ -60,7 +60,7 @@ local function rds_get(k)
     if not ok then
         return
     end
-    return ok 
+    return ok
 end
 
 -- get account info
@@ -70,7 +70,7 @@ local function get_info(acc)
     local request_url = string.format("%s/0x%s/balance", CHAINX_GETACCOUNT, adr)
 
     if ( #adr ~= 64 ) then
-        return { error = "address format error." } 
+        return { error = "address format error." }
     end
     local ok = rds_get("chainx:account:"..adr)
     if ok ~= ngx.null and ok then
@@ -108,10 +108,10 @@ local ok, err = pcall(function()
         RET.error = "missing arguments"
         return
     end
-    
+
     -- get account info
-    local ret_table = get_info(acc) 
-    for k,v in pairs(ret_table) do  
+    local ret_table = get_info(acc)
+    for k,v in pairs(ret_table) do
         RET[k] = v
     end
     return

@@ -6,7 +6,6 @@ local httpc = http.new()
 
 local const = require "constant"
 
-local args = ngx.req.get_uri_args()
 local rds = redis:new()
 rds:set_timeout(1000)
 
