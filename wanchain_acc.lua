@@ -22,6 +22,7 @@ RET.status = 1
 local rds_ip = "127.0.0.1"
 if DEBUG then
     rds_ip = "192.168.1.93"
+    WANCHAIN_RPC = "http://192.168.1.93:18545"
 end
 -- connect redis
 local ok, err = rds:connect(rds_ip, 6379)
@@ -69,7 +70,7 @@ local function gwan_rpc(_method, _params)
     return res
 end
 
-local function getBalance(_addr)
+local function get_balance(_addr)
     local res = gwan_rpc("eth_getBalance",{_addr,"latest"})
 
     if not res then
@@ -79,22 +80,48 @@ local function getBalance(_addr)
     return tonumber(cjson.decode(res.body).result)
 end
 
+local function get_account_stake(_addr)
+    local res = ngx.location.capture('/wanchain/getnodes')
+    response = cjson.decode(res.body).result
+    total_stake = 0
+
+    for _, value in pairs(response) do
+        for _, pv in pairs(value.partners) do
+            if pv.address == _addr then
+                total_stake = total_stake + tonumber(pv.amount)
+                break
+            end
+        end
+
+        for _, pc in pairs(value.clients) do
+            if pc.address == _addr then
+                total_stake = total_stake + tonumber(pc.amount)
+                break
+            end
+        end
+    end
+
+    return total_stake
+end
+
 
 local function get_account(_addr)
-    local iBalance = getBalance(_addr) / 1000000000000000000
+    local iBalance = get_balance(_addr) / 1000000000000000000
+    local locking = get_account_stake(_addr) / 1000000000000000000
+
     return { 
         balance = iBalance,
-        balanceTotal = iBalance,
+        balanceTotal = iBalance + locking,
         exist = true,
         pledged = false,
-        balanceUsable = iBalance,
-        balanceLocking = 0
+        balanceUsable = iBalance + locking,
+        balanceLocking = locking
     }
 end
 
 -- logic
 local ok, err = pcall(function()
-    local res = get_account(args.acc)
+    local res = get_account(string.lower(args.acc))
     if not res then
         RET.status = 1
     else        

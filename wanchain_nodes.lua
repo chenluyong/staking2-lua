@@ -21,6 +21,7 @@ RET.status = 1
 local rds_ip = "127.0.0.1"
 if DEBUG then
     rds_ip = "192.168.1.93"
+    WANCHAIN_RPC = "http://192.168.1.93:18545"
 end
 -- connect redis
 local ok, err = rds:connect(rds_ip, 6379)
@@ -130,7 +131,6 @@ local function get_producers()
         log(ERR, "request"..WANCHAIN_RPC.."failed")
         return nil
     end
-
     block_number = tonumber(cjson.decode(res.body).result)
     res = gwan_rpc("pos_getStakerInfo",{block_number})
     
