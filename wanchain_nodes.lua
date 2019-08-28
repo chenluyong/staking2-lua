@@ -112,9 +112,9 @@ local function convert_stake(_rpc)
 end
 
 
-local function get_producers()
+local function get_producers(_requestUri)
     -- get redis
-    local ok = rds_get("default")
+    local ok = rds_get(_requestUri)
     if ok ~= ngx.null and ok then
         local ret = cjson.decode(ok)
         ret.status = 0
@@ -142,7 +142,7 @@ local function get_producers()
     local ret_obj = convert_stake(cjson.decode(res.body))
 
     -- cache redis
-    rds_set("default",cjson.encode(ret_obj))
+    rds_set(_requestUri,cjson.encode(ret_obj))
 
     return ret_obj
 end
@@ -150,7 +150,7 @@ end
 
 -- logic
 local ok, err = pcall(function()
-    local res = get_producers()
+    local res = get_producers(ngx.var.request_uri)
     if not res then
         RET.status = 1
     else        
