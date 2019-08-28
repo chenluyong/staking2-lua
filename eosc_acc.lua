@@ -44,13 +44,19 @@ local ok, err = rds:get('eosc:account:'..addr)
 if not ok then
     local res, err = httpc:post(EOSC_SEARCHACCOUNT, {
         headers = {['Content-Type'] = 'application/json;charset=UTF-8'},
+        timout = 10,
         body = cjson.encode({
             category = "accounts",
             key_word = addr
         })
     })
+
     if not res then
-        RET.error = "request "..EOSC_SEARCHACCOUNT.."failed: "..err
+        RET.status = 1
+        RET.error = "can not access data"
+        RET.message = err
+        ngx.say(cjson.encode(RET))
+        return
     end
 
     local ret = cjson.decode(res)
@@ -66,7 +72,11 @@ if not ok then
             })
         })
         if not res then
-            RET.error = "request "..EOSC_GETACCOUNT.."failed: "..err
+            RET.status = 1
+            RET.error = "can not access data"
+            RET.message = err
+            ngx.say(cjson.encode(RET))
+            return
         end
 
         local ret = cjson.decode(res)
