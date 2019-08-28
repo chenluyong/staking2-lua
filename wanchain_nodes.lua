@@ -106,14 +106,14 @@ local function convert_stake(_rpc)
         value.fee_rate = value.feeRate / 100
     end
 
-
+    _rpc.full_stake = string.format("%0.2f",full_stake)
     return _rpc
 end
 
 
 local function get_producers()
     -- get redis
---    local ok = rds_get("default")
+    local ok = rds_get("default")
     if ok ~= ngx.null and ok then
         local ret = cjson.decode(ok)
         ret.status = 0
