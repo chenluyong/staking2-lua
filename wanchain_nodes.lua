@@ -14,7 +14,7 @@ local WANCHAIN_RPC = "http://47.99.50.243:80"
 local RET = {}
 local log = ngx.log
 local ERR = ngx.ERR
-local DEBUG = false 
+local DEBUG = const.DEBUG 
 RET.status = 1
 
 -- local ip

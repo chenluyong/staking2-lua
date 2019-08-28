@@ -15,7 +15,7 @@ local WANCHAIN_RPC = "http://47.99.50.243:80"
 local RET = {}
 local log = ngx.log
 local ERR = ngx.ERR
-local DEBUG = false 
+local DEBUG = const.DEBUG 
 RET.status = 1
 
 -- local ip
@@ -109,11 +109,15 @@ local function get_account(_addr)
     local iBalance = get_balance(_addr) / 1000000000000000000
     local locking = get_account_stake(_addr) / 1000000000000000000
 
+    local isPledged = false
+    if locking > 0 then
+        isPledged = true
+    end
     return { 
         balance = iBalance,
         balanceTotal = iBalance + locking,
         exist = true,
-        pledged = false,
+        pledged = isPledged,
         balanceUsable = iBalance + locking,
         balanceLocking = locking
     }
