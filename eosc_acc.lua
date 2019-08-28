@@ -12,8 +12,11 @@ local table = table
 local args = ngx.req.get_uri_args()
 
 --curl -H "Content-Type: application/json" -X POST -d '{"account_name":"bepal.eosc"}' 'https://explorer.eosforce.io/web/get_account_info' | jq
-local EOSC_SEARCHACCOUNT = "https://explorer.eosforce.io/web/search"
-local EOSC_GETACCOUNT = "https://explorer.eosforce.io/web/get_account_info"
+--local EOSC_SEARCHACCOUNT = "https://explorer.eosforce.io/web/search"
+--local EOSC_GETACCOUNT = "https://explorer.eosforce.io/web/get_account_info"
+
+local EOSC_SEARCHACCOUNT = "http://18.179.202.20:9990/web/search"
+local EOSC_GETACCOUNT = "http://18.179.202.20:9990/web/get_account_info"
 
 local RET = {}
 
