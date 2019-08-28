@@ -133,7 +133,7 @@ elseif ok == ngx.null then
         return
     end
 
-    log(ERR, ">>response: ".. res.status .. " " .. res.body)
+    --log(ERR, ">>response: ".. res.status .. " " .. res.body)
 
     --if res.status ~= 200 then
         --RET.exist = false
@@ -175,7 +175,7 @@ elseif ok == ngx.null then
                     id = 5898
                 })
             })
-            log(ERR, ">>response: ".. res.status .. " " .. res.body)
+            --log(ERR, ">>response: ".. res.status .. " " .. res.body)
             local ret = cjson.decode(res.body)
             for _, tx in pairs(ret.result.list) do
                 if tx.type == 5 or tx.type == 6 then

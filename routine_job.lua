@@ -38,7 +38,7 @@ local function chainxGetNominationCount(pub)
     local url = util.expand(CHAINX_NOMINATIONS, pub)
     local res, err = httpc:get(url)
     if not res then
-        util.log("query chainx node ", pub, " info failed: ", err)
+        util.log("[ROUTINE] query chainx node ", pub, " info failed: ", err)
     else
         local voteinfo = cjson.decode(res)
         --util.log(">> chainx node: ", pub, ", voter: ", voteinfo.total)
@@ -51,10 +51,10 @@ local function BystackGetVoterCount(pub)
     local url = util.expand(BYSTACK_NODEINFO, pub)
     local res, err = httpc:get(url)
     if not res then
-        util.log("query bystack node ", pub, " info failed: ", err)
+        util.log("[ROUTINE] query bystack node ", pub, " info failed: ", err)
     else
         local voteinfo = cjson.decode(res)
-        util.log(">> bystack node: ", pub, ", nominator: ", #voteinfo.vote_list)
+        --util.log(">> bystack node: ", pub, ", nominator: ", #voteinfo.vote_list)
         return #voteinfo.vote_list
     end
     return 0

@@ -106,7 +106,7 @@ elseif ok == ngx.null then
         return
     end
 
-    log(ERR, ">>response: ".. res.status .. " " .. res.body)
+    --log(ERR, ">>response: ".. res.status .. " " .. res.body)
 
     --if res.status ~= 200 then
         --RET.exist = false

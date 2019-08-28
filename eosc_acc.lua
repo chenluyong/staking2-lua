@@ -12,8 +12,11 @@ local table = table
 local args = ngx.req.get_uri_args()
 
 --curl -H "Content-Type: application/json" -X POST -d '{"account_name":"bepal.eosc"}' 'https://explorer.eosforce.io/web/get_account_info' | jq
-local EOSC_SEARCHACCOUNT = "https://explorer.eosforce.io/web/search"
-local EOSC_GETACCOUNT = "https://explorer.eosforce.io/web/get_account_info"
+--local EOSC_SEARCHACCOUNT = "https://explorer.eosforce.io/web/search"
+--local EOSC_GETACCOUNT = "https://explorer.eosforce.io/web/get_account_info"
+
+local EOSC_SEARCHACCOUNT = "http://18.179.202.20:9990/web/search"
+local EOSC_GETACCOUNT = "http://18.179.202.20:9990/web/get_account_info"
 
 local RET = {}
 
@@ -44,13 +47,19 @@ local ok, err = rds:get('eosc:account:'..addr)
 if not ok then
     local res, err = httpc:post(EOSC_SEARCHACCOUNT, {
         headers = {['Content-Type'] = 'application/json;charset=UTF-8'},
+        timout = 10,
         body = cjson.encode({
             category = "accounts",
             key_word = addr
         })
     })
+
     if not res then
-        RET.error = "request "..EOSC_SEARCHACCOUNT.."failed: "..err
+        RET.status = 1
+        RET.error = "can not access data"
+        RET.message = err
+        ngx.say(cjson.encode(RET))
+        return
     end
 
     local ret = cjson.decode(res)
@@ -66,7 +75,11 @@ if not ok then
             })
         })
         if not res then
-            RET.error = "request "..EOSC_GETACCOUNT.."failed: "..err
+            RET.status = 1
+            RET.error = "can not access data"
+            RET.message = err
+            ngx.say(cjson.encode(RET))
+            return
         end
 
         local ret = cjson.decode(res)
