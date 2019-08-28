@@ -10,7 +10,7 @@ local const = require "constant"
 
 -- var
 local rds = redis:new()
-local WANCHAIN_RPC = "http://192.168.1.93:18545"
+local WANCHAIN_RPC = "http://47.99.50.243:80"
 local RET = {}
 local log = ngx.log
 local ERR = ngx.ERR
