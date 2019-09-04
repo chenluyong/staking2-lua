@@ -6,19 +6,19 @@ local RET = {}
 local rds = redis:new()
 rds:set_timeout(config.REDIS.timeout)
 
-function connect_rds()
+function rds_connect()
     rds:set_keepalive(10000,100)
     local ok, err = rds:connect(config.REDIS.ip, config.REDIS.port)
     if not ok then
         RET.warning = "internal error: " .. err .. ". " .. debug.getinfo(1).name
-        RET.warning_code = debug.getinfo(1).currentline
+        RET.code = debug.getinfo(1).currentline
         return false
     end
     return true
 end
 
 function rds_get(_k)
-    if not connect_rds() then
+    if not rds_connect() then
         return nil 
     end
 
@@ -36,7 +36,7 @@ function rds_set(_k, _v)
 end
 
 function rds_set(_k, _v, _time)
-    if not connect_rds() then
+    if not _k or not rds_connect() then
         return false
     end
 
@@ -47,7 +47,7 @@ function rds_set(_k, _v, _time)
         rds:expire(_k, _time)
     else
         RET.warning = "internal error:" .. err .. ". " .. debug.getinfo(1).name
-        RET.warning_code = debug.getinfo(1).currentline
+        RET.code = debug.getinfo(1).currentline
         return false
     end
     return true
@@ -68,38 +68,67 @@ local ok, err = pcall(function()
     get info
     --]]
     -- get cache
-    rds_get(request_uri)
+    local ret = rds_get(request_uri)
+    if ret ~= nil and ret ~= ngx.null then
+        return cjson.decode(ret)
+    end
 
-    -- call 
+    -- get lua path
+    local path = string.gsub(ngx.var.uri, "/", ".")
+    path = string.sub(path,2)
+    local lua = require(path)
+    local lua_ret = lua.main()
 
---     ngx.say(CONST.REDIS.account_list["wanchain"])
---     ngx.say(request_uri)
-    local ret_table = {
-        success = true
-    }
+
+
+    -- convert ret
+    
+
+    -- call
+    local ret_table = lua_ret
+--    {
+--        success = true,
+--        request_uri = request_uri,
+--        uri = ngx.var.uri,
+--        path = path
+--    }
+
     --[[
     check
     --]]
-    
 
+    return ret_table
+end
+--, function() RET.tracebak = debug.traceback() end, 133
+)
 
+-- alias
+local ret_table = err 
 
+if not ok then
+    RET.error = err
+--    RET.tracebak = debug.traceback()
+--    RET.code = debug.getinfo(1).currentline
+else
     -- merge tables
-    for k,v in pairs(ret_table) do  
+    for k,v in pairs(ret_table) do
         RET[k] = v
     end
-    if not RET.error then
-        rds_set(request_uri, cjson.encode(RET))
-    end
-end)
+end
+
+-- merge tables
+--for k,v in pairs(ret_table) do
+--    RET[k] = v
+--end
+
+-- cache result
+if not RET.error and not RET.warning then
+    rds_set(request_uri, cjson.encode(RET))
+end
 
 
 -- put it into the connection poll
---local ok, err = rds:set_keepalive(10000,100)
---ngx.say('ok'..ok)
---ngx.say('redis err'..err)
---if not ok then
+--rds:set_keepalive(10000,100)
 
---end
 
 ngx.say(cjson.encode(RET))
