@@ -6,6 +6,6 @@ _M.CAMO_UA = {['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/
 
 
 
-_M.DEBUG = false 
+_M.DEBUG = true 
 
 return _M
