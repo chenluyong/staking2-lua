@@ -23,6 +23,7 @@ _M.CAMO_UA = {['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/
 _M.CHAINX_GETACCOUNT = "https://api.chainx.org.cn/account"
 _M.CHAINX_ACCOUNT_PY = "/usr/local/openresty/nginx/conf/staking2/libraries/scripts/chainx.py"
 
+_M.IOST_NODESINFO = "https://www.iostabc.com/api/producers"
 
 
 _M.REDIS = {
