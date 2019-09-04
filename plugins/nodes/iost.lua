@@ -22,6 +22,7 @@ end
 
 
 local function convert(_obj)
+    -- convert object to std node info object
     return _obj
 end
 
