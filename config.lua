@@ -25,10 +25,10 @@ _M.CHAINX_ACCOUNT_PY = "/usr/local/openresty/nginx/conf/staking2/libraries/scrip
 
 _M.IOST_NODESINFO = "https://www.iostabc.com/api/producers"
 
+_M.WANCHAIN_RPC = "http://47.99.50.243:80"
 
 _M.REDIS = {
-    
-    ip = "192.168.1.93",
+    ip = "127.0.0.1",
     port = 6379,
     timeout = 1000,
     account_list = {
@@ -40,6 +40,13 @@ _M.REDIS = {
         default = 86400
     }
 }
+
+local DEBUG = true
+
+if DEBUG then
+    _M.WANCHAIN_RPC = "http://192.168.1.93:18545"
+    _M.REDIS.ip = "192.168.1.93"
+end
 
 
 -- DEBUG
