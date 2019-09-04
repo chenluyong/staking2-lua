@@ -19,10 +19,10 @@ end
 
 function rds_get(_k)
     if not rds_connect() then
-        return nil 
+        return nil
     end
 
-    _k = "accounts:".._k
+--    _k = "accounts:".._k
     local ok, err = rds:get(_k)
 
     if not ok then
@@ -40,7 +40,7 @@ function rds_set(_k, _v, _time)
         return false
     end
 
-    _k = "accounts:" .. _k
+--    _k = "accounts:" .. _k
     local ok, err = rds:set(_k, _v)
 
     if ok then
@@ -55,43 +55,26 @@ end
 
 
 local ok, err = pcall(function()
-
-    --[[
-    analyze request uri
-    --]]
-
-    -- read config.lua
     -- get request uri
-    local request_uri = ngx.var.request_uri
+    local request_all_uri = ngx.var.request_uri
+    local request_uri = ngx.var.uri
 
     --[[
     get info
     --]]
     -- get cache
-    local ret = rds_get(request_uri)
+    local ret = rds_get(request_all_uri)
     if ret ~= nil and ret ~= ngx.null then
         return cjson.decode(ret)
     end
 
     -- get lua path
-    local path = string.gsub(ngx.var.uri, "/", ".")
+    local path = string.gsub(request_uri, "/", ".")
     path = string.sub(path,2)
-    local lua = require(path)
-    local lua_ret = lua.main()
-
-
-
-    -- convert ret
-    
 
     -- call
-    local ret_table = lua_ret
---    {
---        success = true,
---        request_uri = request_uri,
---        uri = ngx.var.uri,
---        path = path
---    }
+    local lua = require(path)
+    local ret_table = lua.main()
 
     --[[
     check
@@ -107,28 +90,24 @@ local ret_table = err
 
 if not ok then
     RET.error = err
---    RET.tracebak = debug.traceback()
---    RET.code = debug.getinfo(1).currentline
+    -- RET.tracebak = debug.traceback()
+    if not RET.code then
+        RET.code = debug.getinfo(1).currentline
+    end
 else
     -- merge tables
     for k,v in pairs(ret_table) do
         RET[k] = v
     end
-end
 
--- merge tables
---for k,v in pairs(ret_table) do
---    RET[k] = v
---end
-
--- cache result
-if not RET.error and not RET.warning then
-    rds_set(request_uri, cjson.encode(RET))
+    -- cache result
+    if not RET.error and not RET.warning then
+        rds_set(ngx.var.request_uri, cjson.encode(RET))
+    end
 end
 
 
 -- put it into the connection poll
---rds:set_keepalive(10000,100)
-
-
+rds:set_keepalive(10000,100)
+-- return
 ngx.say(cjson.encode(RET))
