@@ -14,6 +14,8 @@ local MAJOR_VERSION = 1
 local MINOR_VERSION = 0
 local PATCH_VERSION = _M.git_commit_count()
 
+
+
 _M.VERSION = MAJOR_VERSION .. "." .. MINOR_VERSION .. "." .. PATCH_VERSION
 
 
@@ -26,17 +28,19 @@ _M.CHAINX_ACCOUNT_PY = "/usr/local/openresty/nginx/conf/staking2/libraries/scrip
 _M.IOST_NODESINFO = "https://www.iostabc.com/api/producers"
 
 _M.WANCHAIN_RPC = "http://47.99.50.243:80"
+_M.WANCHAIN_NODESINFO = "http://47.99.50.243:80/nodes/wanchain"
 
 _M.REDIS = {
     ip = "127.0.0.1",
     port = 6379,
     timeout = 1000,
-    account_list = {
-        wanchain = 3600,
+    default_time = 1200,
+    accounts = {
+        wanchain = 0, -- no cache, real-time
         default  = 1200 -- default 20 minutes timeout
     },
-    nodes_list = {
-        wanchain = 0, -- no cache, real-time
+    nodes = {
+        wanchain = 3600, -- no cache, real-time
         default = 86400
     }
 }
@@ -46,6 +50,7 @@ local DEBUG = true
 if DEBUG then
     _M.WANCHAIN_RPC = "http://192.168.1.93:18545"
     _M.REDIS.ip = "192.168.1.93"
+    _M.WANCHAIN_NODESINFO = "http://192.168.1.93:80/nodes/wanchain"
 end
 
 

@@ -32,7 +32,7 @@ function rds_get(_k)
 end
 
 function rds_set(_k, _v)
-    return rds_set(_k, _v, 1800)
+    return rds_set(_k, _v, config.REDIS.default_time)
 end
 
 function rds_set(_k, _v, _time)
@@ -53,12 +53,33 @@ function rds_set(_k, _v, _time)
     return true
 end
 
-local function main()
-    local ok, err = pcall(function()
-        -- get request uri
-        local request_all_uri = ngx.var.request_uri
-        local request_uri = ngx.var.uri
+string.split = function(s, p)
 
+    local rt= {}
+    string.gsub(s, '[^'..p..']+', function(w) table.insert(rt, w) end )
+    return rt
+
+end
+
+local function main()
+
+    -- get request uri
+    local request_all_uri = ngx.var.request_uri
+    local request_uri = ngx.var.uri
+
+    -- get lua path
+    local request_table = string.split(request_uri,"/")
+    local request_type = request_table[1]
+    local request_blockchain = request_table[2]
+--    ngx.say(type(request_table))
+--    if true then
+--        return
+--    end
+    local path = request_type .. "." .. request_blockchain
+--    local path = string.gsub(request_uri, "/", ".")
+--    path = string.sub(path,2)
+
+    local ok, err = pcall(function()
         --[[
         get info
         --]]
@@ -67,10 +88,6 @@ local function main()
         if ret ~= nil and ret ~= ngx.null then
             return cjson.decode(ret)
         end
-
-        -- get lua path
-        local path = string.gsub(request_uri, "/", ".")
-        path = string.sub(path,2)
 
         -- call
         local lua = require(path)
@@ -102,7 +119,10 @@ local function main()
 
         -- cache result
         if not RET.error and not RET.warning then
-            rds_set(ngx.var.request_uri, cjson.encode(RET))
+            local time = config.REDIS[request_type][request_blockchain]
+            if time ~= 0 then
+                pcall(rds_set(ngx.var.request_uri, cjson.encode(RET), time))
+            end
         end
     end
 
