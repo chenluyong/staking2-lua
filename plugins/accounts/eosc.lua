@@ -1,22 +1,15 @@
-
 local cjson = require "cjson"
-local redis = require "resty.iredis"
-local rds = redis:new()
 local http = require "resty.ihttp"
 local httpc = http:new()
-local util = require "util"
+local util = require "staking2.util"
+local config = require "config"
+
+local _M = {}
 
 local string = string
 local table = table
 
 local args = ngx.req.get_uri_args()
-
---curl -H "Content-Type: application/json" -X POST -d '{"account_name":"bepal.eosc"}' 'https://explorer.eosforce.io/web/get_account_info' | jq
---local EOSC_SEARCHACCOUNT = "https://explorer.eosforce.io/web/search"
---local EOSC_GETACCOUNT = "https://explorer.eosforce.io/web/get_account_info"
-
-local EOSC_SEARCHACCOUNT = "http://18.179.202.20:9990/web/search"
-local EOSC_GETACCOUNT = "http://18.179.202.20:9990/web/get_account_info"
 
 local RET = {}
 
@@ -36,16 +29,19 @@ local function normalize(str)
     return tonumber(val[1])
 end
 
-local addr = args.acc
-if not addr then
-    log(ERR, "ERR not bystack address provided.")
-    ngx.say(cjson.encode({status = 1, error = "missing arguments"}))
-    return
-end
+function _M.main()
 
-local ok, err = rds:get('eosc:account:'..addr)
-if not ok then
-    local res, err = httpc:post(EOSC_SEARCHACCOUNT, {
+    local addr = args.acc
+    if not addr then
+    --    log(ERR, "ERR not bystack address provided.")
+        return {
+            status = 1,
+            error = "missing arguments",
+            code = debug.getinfo(1).currentline
+        }
+    end
+
+    local res, err = httpc:post(config.EOSC_SEARCHACCOUNT, {
         headers = {['Content-Type'] = 'application/json;charset=UTF-8'},
         timout = 10,
         body = cjson.encode({
@@ -58,8 +54,7 @@ if not ok then
         RET.status = 1
         RET.error = "can not access data"
         RET.message = err
-        ngx.say(cjson.encode(RET))
-        return
+        return RET
     end
 
     local ret = cjson.decode(res)
@@ -67,7 +62,7 @@ if not ok then
         RET.exist = false
         RET.error = string.format("account doesn't exist")
     else
-        local res, err = httpc:post(EOSC_GETACCOUNT, {
+        local res, err = httpc:post(config.EOSC_GETACCOUNT, {
             headers = {['Content-Type'] = 'application/json;charset=UTF-8'},
             timeout = 10,
             body = cjson.encode({
@@ -78,8 +73,7 @@ if not ok then
             RET.status = 1
             RET.error = "can not access data"
             RET.message = err
-            ngx.say(cjson.encode(RET))
-            return
+            return RET
         end
 
         local ret = cjson.decode(res)
@@ -117,19 +111,9 @@ if not ok then
             end
         end
 
-        if not RET.error then
-            ok, err = rds:set('eosc:account:'..addr, cjson.encode(RET))
-            if not ok then
-                util.log("save result to redis failed: "..err)
-            end
-            ok, err = rds:expire('eosc:account:'..addr, 300)
-            if not ok then
-                util.log("set key expire failed")
-            end
-        end
     end
-else
-    RET = cjson.decode(ok)
+    return RET
 end
 
-ngx.say(cjson.encode(RET))
+
+return _M

@@ -9,7 +9,12 @@ local _M = {
     CHAINX_DECIMAL = 100000000,
 
     --curl -H "Content-Type: application/json" -X POST -d '{"code":"eosio","json":true,"limit":1000,"scope":"eosio","table":"bps"}' 'https://w3.eosforce.cn/v1/chain/get_table_rows' | jq
-     EOSC_NODESINFO = "https://w3.eosforce.cn/v1/chain/get_table_rows"
+     EOSC_NODESINFO = "https://w3.eosforce.cn/v1/chain/get_table_rows",
+
+    --curl -H "Content-Type: application/json" -X POST -d '{"account_name":"bepal.eosc"}' 'https://explorer.eosforce.io/web/get_account_info' | jq
+     EOSC_SEARCHACCOUNT = "http://18.179.202.20:9990/web/search",
+     EOSC_GETACCOUNT = "http://18.179.202.20:9990/web/get_account_info"
+
 }
 
 _M.ROOT_PATH = "/usr/local/openresty/nginx/conf/staking2"
