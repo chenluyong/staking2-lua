@@ -21,7 +21,10 @@ local _M = {
      BYSTACK_RPC = "http://127.0.0.1:9889/",
      BYSTACK_GETACCOUNT = "https://vapor.blockmeta.com/api/v1/address/",
      BYSTACK_GETTXS_PREFIX = "/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?limit=100",
-
+     VAPOR_NODESINFO = "https://vapor.blockmeta.com/api/v1/nodes",
+     VAPOR_NODEINFO = "https://vapor.blockmeta.com/api/v1/node/",
+     -- https://api.bystack.com/supernode/v1/sn-table
+     BYSTACK_NODESINFO = "https://api.bystack.com/supernode/v1/sn-table",
 
     -- https://www.iostabc.com/endpoint/getAccount/hibarui/0
      IOSTABC_GETACCOUNT = "https://www.iostabc.com/endpoint/getAccount/",
@@ -69,15 +72,15 @@ _M.REDIS = {
     port = 6379,
     timeout = 1000,
     default_time = 1200,
-    accounts = {
+    close_accounts = {
         wanchain = 0, -- no cache, real-time
         default  = 1200 -- default 20 minutes timeout
     },
     nodes = {
-        wanchain = 3600, -- no cache, real-time
-        default = 86400
+        vapor = 86400, -- one day
+        default = 0
     },
-    tests = {
+    close_tests = {
         default = 0
     }
 }

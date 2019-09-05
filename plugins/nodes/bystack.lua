@@ -1,4 +1,3 @@
-
 local cjson = require "cjson"
 local http = require 'resty.http'
 local httpc = http.new()
@@ -9,7 +8,13 @@ local _M = {}
 
 local RET = {}
 
-function _M.main()
+local function convert(_t)
+--    for _, v in pairs(_t) do 
+--    end
+    return _t
+end
+
+function _M.main_btm()
     local res, err = httpc:request_uri(config.BYSTACK_NODESINFO, {
         method = "GET",
         headers = config.CAMO_UA
@@ -17,7 +22,7 @@ function _M.main()
 
     if not res then
 --        log(ERR, "request" .. BYSTACK_NODESINFO .. "failed: " .. err )
-        RET.error = "request " .. BYSTACK_NODESINFO .. "failed: " .. err
+        RET.error = "request " .. config.BYSTACK_NODESINFO .. "failed: " .. err
     end
 
     local ret = cjson.decode(res.body)
@@ -27,19 +32,21 @@ function _M.main()
         RET.error = ret.error
     else
         local nodeinfo = {}
-
+        
         for _, node in pairs(ret.data) do
             if node.name ~= "-" then
                 nodeinfo[node.name] = {
-                    name = node.name,
-                    introduce = node.introduce,
-                    icon = string.format("https://api.bystack.com/supernode/v1%s", node.reserved_1),
-                    --totalVote = node.vote_count / 100000000,
-                    votePercent = tonumber(string.format("%.4f", node.percent)),
-                    commissionFee = 100 - tonumber(string.match(node.reward, "%d+")) .. "%",
+                    alias = node.name,
+                    alias_en = node.name,
+                    description = node.introduce,
+                    description_en = node.introduce,
+                    logo = string.format("https://api.bystack.com/supernode/v1%s", node.reserved_1),
+                    --vote_amount = node.vote_count / 100000000,
+                    --vote_percent = tonumber(string.format("%.4f", node.percent)),
+                    commission_fee = 100 - tonumber(string.match(node.reward, "%d+")),
                     --nodeAddress = node.reserved_2,
                     --nodePubKey = node.public_key,
-                    homePage = node.homepage
+                    website = node.homepage
                 }
             end
         end
@@ -60,12 +67,12 @@ function _M.main()
             for _, node in pairs(ret.data.lists) do
                 local name = node.name -- avoid empty name
                 if nodeinfo[name] then
-                    nodeinfo[name].totalVote = node.vote_count / 100000000
-                    nodeinfo[name].nodeType = node.type
-                    nodeinfo[name].nodeAddress = node.address
-                    nodeinfo[name].nodePubKey = node.pub_key
-                    nodeinfo[name].userYield = node.expected_return
-                    nodeinfo[name].votePercent = tonumber(string.format("%.4f", node.vote_count / netTotalVote))
+                    nodeinfo[name].total_vote = node.vote_count / 100000000
+                    nodeinfo[name].type = node.type
+                    --nodeinfo[name].ip = node.address
+                    nodeinfo[name].pub_key = node.pub_key
+                    nodeinfo[name].user_yield = node.expected_return
+                    nodeinfo[name].vote_percent = tonumber(string.format("%.4f", node.vote_count / netTotalVote))
                 else
 --                    log(ERR, ">>name: '"..name.."' not found")
                 end
@@ -73,14 +80,18 @@ function _M.main()
         else
 --            log(ERR, "bystack api return error, abort: ".. ret.code)
         end
-
+        RET.nodes = {}
         for _, info in pairs(nodeinfo) do
-            table.insert(RET, info)
+            table.insert(RET.nodes, info)
         end
 
     end
-
-    return RET
+    return convert(RET)
 end
+
+function _M.main()
+    return _M.main_btm()
+end
+
 
 return _M
