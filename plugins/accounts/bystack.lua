@@ -1,27 +1,14 @@
-
 local cjson = require "cjson"
-local redis = require "resty.redis"
 local base58 = require("resty.base58")
 local bit = require("bit")
 local http = require "resty.http"
 local httpc = http.new()
+local config = require("config")
 
-local const = require "constant"
-
-local args = ngx.req.get_uri_args()
-local rds = redis:new()
-rds:set_timeout(1000)
-
-local log = ngx.log
-local ERR = ngx.ERR
+local _M = {}
 
 local RET = {}
-
---http://vapor.blockmeta.com/api/v1/address/vp1qcj7dzpjlnsg7pf24nj6pduar9dc24uxe8ywc9
-BYSTACK_RPC = "http://127.0.0.1:9889/"
-BYSTACK_GETACCOUNT = "https://vapor.blockmeta.com/api/v1/address/"
-BYSTACK_GETTXS_PREFIX = "/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?limit=100"
-ADDRESS_LENGTH = 42
+local ADDRESS_LENGTH = 42
 
 function hex_dump (str)
     local len = string.len( str )
@@ -58,14 +45,16 @@ function validate_address(addr)
         return nil
     end
 
-    local res, err = httpc:request_uri(BYSTACK_RPC..'validate-address', {
+    local res, err = httpc:request_uri(config.BYSTACK_RPC..'validate-address', {
         method = "POST",
-        headers = const.CAMO_UA,
+        headers = config.CAMO_UA,
         body = cjson.encode({
             address = addr,
         })
     })
-
+    if not res or res.body then
+        return nil
+    end
     local ret = cjson.decode(res.body)
     if ret and ret.status == "success" then
         if ret.data.valid == true then
@@ -77,33 +66,24 @@ function validate_address(addr)
 
 end
 
-local ok, err = rds:connect("127.0.0.1", 6379)
-if not ok then
-    log(ERR, "failed to connect rds.")
-    RET.error = "internal error: rfailed."
-end
+function _M.main()
 
-local addr = args.acc
-if not addr then
-    log(ERR, "ERR not bystack address provided.")
-    ngx.say(cjson.encode({status = 1, error = "missing arguments"}))
-    return
-end
+    local args = ngx.req.get_uri_args()
+    local addr = args.acc
+    if not addr then
+    --    log(ERR, "ERR not bystack address provided.")
+    --    ngx.say(cjson.encode({status = 1, error = "missing arguments"}))
+        return {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
+    end
 
-ok, err = rds:get('bystack:account:'..addr)
-if not ok then
-    log(ERR, "get bystack from rds failed: "..err)
-    RET.error = "internal error: rfailed."
-elseif ok == ngx.null then
-    log(ERR, "bystack address " .. addr .. " not found in rds")
-    local res, err = httpc:request_uri(BYSTACK_GETACCOUNT..addr, {
+--    log(ERR, "bystack address " .. addr .. " not found in rds")
+    local res, err = httpc:request_uri(config.BYSTACK_GETACCOUNT..addr, {
         method = "GET",
-        headers = const.CAMO_UA,
+        headers = config.CAMO_UA,
     })
 
     if not res then
-        log(ERR, "request "..BYSTACK_GETACCOUNT.."failed")
-        return
+        return {error = "request "..config.BYSTACK_GETACCOUNT.."failed", code = debug.getinfo(1).currentline }
     end
 
     --log(ERR, ">>response: ".. res.status .. " " .. res.body)
@@ -134,15 +114,14 @@ elseif ok == ngx.null then
         RET.balanceTotal = ret.data.address[1].balance / 100000000
         RET.pledged = false
 
-        local url = string.format("%s%s%s", BYSTACK_GETACCOUNT, addr, BYSTACK_GETTXS_PREFIX)
+        local url = string.format("%s%s%s", config.BYSTACK_GETACCOUNT, addr, config.BYSTACK_GETTXS_PREFIX)
         local res, err = httpc:request_uri(url, {
             method = "GET",
-            headers = const.CAMO_UA
+            headers = config.CAMO_UA
         })
 
         if not res then
-            log(ERR, "request "..url.."failed")
-            return
+            return  {error = "request ".. url .."failed", code = debug.getinfo(1).currentline }
         end
 
         local ret = cjson.decode(res.body)
@@ -172,28 +151,8 @@ elseif ok == ngx.null then
         --end
     end
 
-    if not RET.error then
-        ok, err = rds:set('bystack:account:'..addr, cjson.encode(RET))
-        if not ok then
-            log(ERR, "save result to redis failed: "..err)
-        end
-        ok, err = rds:expire('bystack:account:'..addr, 300)
-        if not ok then
-            log(ERR, "set key expire failed")
-        end
-    end
-
     RET.status = 0
-else
-    log(ERR, "bystack address ".. addr .." found in cache")
-    RET = cjson.decode(ok)
-    RET.status = 0
+    return RET
 end
 
-local ok, err = rds:set_keepalive(30000, 100)
-if not ok then
-    RET.error = "internal error: rfailed."
-end
-
-ngx.say(cjson.encode(RET))
-
+return _M

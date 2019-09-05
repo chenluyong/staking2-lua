@@ -13,7 +13,14 @@ local _M = {
 
     --curl -H "Content-Type: application/json" -X POST -d '{"account_name":"bepal.eosc"}' 'https://explorer.eosforce.io/web/get_account_info' | jq
      EOSC_SEARCHACCOUNT = "http://18.179.202.20:9990/web/search",
-     EOSC_GETACCOUNT = "http://18.179.202.20:9990/web/get_account_info"
+--ngx.say(config.EOSC_SEARCHACCOUNT)
+     EOSC_GETACCOUNT = "http://18.179.202.20:9990/web/get_account_info",
+
+    --http://vapor.blockmeta.com/api/v1/address/vp1qcj7dzpjlnsg7pf24nj6pduar9dc24uxe8ywc9
+    BYSTACK_RPC = "http://127.0.0.1:9889/",
+    BYSTACK_GETACCOUNT = "https://vapor.blockmeta.com/api/v1/address/",
+    BYSTACK_GETTXS_PREFIX = "/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?limit=100"
+
 
 }
 
