@@ -7,6 +7,7 @@ local _M = {
 
     CHAINX_RPC = "http://127.0.0.1:8081/chainx/",
     CHAINX_DECIMAL = 100000000,
+    CHAINXTOOLS_API = "https://api.chainxtools.com/price?t=",
 
     --curl -H "Content-Type: application/json" -X POST -d '{"code":"eosio","json":true,"limit":1000,"scope":"eosio","table":"bps"}' 'https://w3.eosforce.cn/v1/chain/get_table_rows' | jq
      EOSC_NODESINFO = "https://w3.eosforce.cn/v1/chain/get_table_rows",
@@ -17,15 +18,15 @@ local _M = {
      EOSC_GETACCOUNT = "http://18.179.202.20:9990/web/get_account_info",
 
     --http://vapor.blockmeta.com/api/v1/address/vp1qcj7dzpjlnsg7pf24nj6pduar9dc24uxe8ywc9
-    BYSTACK_RPC = "http://127.0.0.1:9889/",
-    BYSTACK_GETACCOUNT = "https://vapor.blockmeta.com/api/v1/address/",
-    BYSTACK_GETTXS_PREFIX = "/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?limit=100",
+     BYSTACK_RPC = "http://127.0.0.1:9889/",
+     BYSTACK_GETACCOUNT = "https://vapor.blockmeta.com/api/v1/address/",
+     BYSTACK_GETTXS_PREFIX = "/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?limit=100",
 
 
     -- https://www.iostabc.com/endpoint/getAccount/hibarui/0
-    IOSTABC_GETACCOUNT = "https://www.iostabc.com/endpoint/getAccount/",
+     IOSTABC_GETACCOUNT = "https://www.iostabc.com/endpoint/getAccount/",
 
-    NULSCAN_GETACCOUNT = "https://api.nuls.io"
+     NULSCAN_GETACCOUNT = "https://api.nuls.io"
 
 }
 
