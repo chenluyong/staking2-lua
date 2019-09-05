@@ -86,6 +86,12 @@ end
 
 function _M.main()
     local args = ngx.req.get_uri_args()
+    if not args.acc then
+        return {
+            error = "please input address args.",
+            code = debug.getinfo(1).currentline
+        }
+    end
     return get_account(string.lower(args.acc))
 end
 
