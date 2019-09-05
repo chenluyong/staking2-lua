@@ -22,7 +22,6 @@ function rds_get(_k)
         return nil
     end
 
---    _k = "accounts:".._k
     local ok, err = rds:get(_k)
 
     if not ok then
@@ -40,7 +39,6 @@ function rds_set(_k, _v, _time)
         return false
     end
 
---    _k = "accounts:" .. _k
     local ok, err = rds:set(_k, _v)
 
     if ok then
@@ -119,9 +117,9 @@ local function main()
 
         -- cache result
         if not RET.error and not RET.warning then
-            local time = config.REDIS[request_type][request_blockchain]
+            local expire_time = config.REDIS[request_type][request_blockchain]
             if time ~= 0 then
-                pcall(rds_set(ngx.var.request_uri, cjson.encode(RET), time))
+                pcall(rds_set(ngx.var.request_uri, cjson.encode(RET), expire_time))
             end
         end
     end
@@ -129,8 +127,9 @@ local function main()
 
     -- put it into the connection poll
     rds:set_keepalive(10000,100)
-    -- return
-    ngx.say(cjson.encode(RET))
 end
 
 main()
+RET.version = config.VERSION
+-- return
+ngx.say(cjson.encode(RET))
