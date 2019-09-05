@@ -6,8 +6,10 @@ local _M = {
     BYSTACK_NODESDETAIL = "https://vapor.blockmeta.com/api/v1/nodes?page=1&limit=200",
 
     CHAINX_RPC = "http://127.0.0.1:8081/chainx/",
-    CHAINX_DECIMAL = 100000000
+    CHAINX_DECIMAL = 100000000,
 
+    --curl -H "Content-Type: application/json" -X POST -d '{"code":"eosio","json":true,"limit":1000,"scope":"eosio","table":"bps"}' 'https://w3.eosforce.cn/v1/chain/get_table_rows' | jq
+     EOSC_NODESINFO = "https://w3.eosforce.cn/v1/chain/get_table_rows"
 }
 
 _M.ROOT_PATH = "/usr/local/openresty/nginx/conf/staking2"

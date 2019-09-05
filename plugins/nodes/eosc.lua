@@ -1,16 +1,13 @@
-
+local config = require("config")
 local cjson = require "cjson"
-local redis = require "resty.iredis"
-local rds = redis:new()
 local http = require "resty.ihttp"
 local httpc = http:new()
-local util = require "util"
+local util = require "staking2.util"
+
+local _M = {}
 
 local string = string
 local table = table
-
---curl -H "Content-Type: application/json" -X POST -d '{"code":"eosio","json":true,"limit":1000,"scope":"eosio","table":"bps"}' 'https://w3.eosforce.cn/v1/chain/get_table_rows' | jq
-local EOSC_NODESINFO = "https://w3.eosforce.cn/v1/chain/get_table_rows"
 
 local RET = {}
 
@@ -34,9 +31,8 @@ local function sort_by_vote(a, b)
     return a.totalVote > b.totalVote
 end
 
-local ok, err = rds:get('eosc:nodes')
-if not ok then
-    local res, err = httpc:post(EOSC_NODESINFO, {
+function _M.main()
+    local res, err = httpc:post(config.EOSC_NODESINFO, {
         headers = {['Content-Type'] = 'application/json;charset=UTF-8'},
         body = cjson.encode({
             code = "eosio",
@@ -47,7 +43,7 @@ if not ok then
         })
     })
     if not res then
-        RET.error = "request "..EOSC_NODESINFO.."failed: "..err
+        RET.error = "request "..config.EOSC_NODESINFO.."failed: "..err
     end
 
     local nodesinfo = {}
@@ -101,19 +97,7 @@ if not ok then
     end
 
     RET = nodesinfo
-
-    if not RET.error then
-        ok, err = rds:set('eosc:nodes', cjson.encode(RET))
-        if not ok then
-            util.log("save result to redis failed: "..err)
-        end
-        ok, err = rds:expire('eosc:nodes', 3600)
-        if not ok then
-            util.log("set key expire failed")
-        end
-    end
-else
-    RET = cjson.decode(ok)
+    return RET
 end
 
-ngx.say(cjson.encode(RET))
+return _M
