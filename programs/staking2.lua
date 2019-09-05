@@ -68,14 +68,8 @@ local function main()
     -- get lua path
     local request_table = string.split(request_uri,"/")
     local request_type = request_table[1]
-    local request_blockchain = request_table[2]
---    ngx.say(type(request_table))
---    if true then
---        return
---    end
-    local path = request_type .. "." .. request_blockchain
---    local path = string.gsub(request_uri, "/", ".")
---    path = string.sub(path,2)
+    local request_module = request_table[2]
+    local path = request_type .. "." .. request_module
 
     local ok, err = pcall(function()
         --[[
@@ -119,8 +113,8 @@ local function main()
             RET.code = 0
         end
         -- cache result
-        if not RET.error and not RET.warning and request_type and request_blockchain and config.REDIS[request_type] then
-            local expire_time = config.REDIS[request_type][request_blockchain]
+        if not RET.error and not RET.warning and request_type and request_module and config.REDIS[request_type] then
+            local expire_time = config.REDIS[request_type][request_module]
             if not expire_time then
                 expire_time = config.REDIS[request_type]['default']
             end
