@@ -119,7 +119,7 @@ local function main()
             RET.code = 0
         end
         -- cache result
-        if not RET.error and not RET.warning and request_type and request_blockchain then
+        if not RET.error and not RET.warning and request_type and request_blockchain and config.REDIS[request_type] then
             local expire_time = config.REDIS[request_type][request_blockchain]
             if not expire_time then
                 expire_time = config.REDIS[request_type]['default']
