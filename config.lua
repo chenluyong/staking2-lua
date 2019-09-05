@@ -23,8 +23,9 @@ local _M = {
 
 
     -- https://www.iostabc.com/endpoint/getAccount/hibarui/0
-    IOSTABC_GETACCOUNT = "https://www.iostabc.com/endpoint/getAccount/"
+    IOSTABC_GETACCOUNT = "https://www.iostabc.com/endpoint/getAccount/",
 
+    NULSCAN_GETACCOUNT = "https://api.nuls.io"
 
 }
 

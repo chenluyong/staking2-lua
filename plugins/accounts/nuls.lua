@@ -1,19 +1,11 @@
-
 local cjson = require "cjson"
-local redis = require "resty.redis"
 local base58 = require("resty.base58")
 local bit = require("bit")
 local http = require "resty.http"
 local httpc = http.new()
+local config = require ("config")
 
-local args = ngx.req.get_uri_args()
-local rds = redis:new()
-rds:set_timeout(1000)
-
-local const = require "constant"
-
-local log = ngx.log
-local ERR = ngx.ERR
+local _M = {}
 
 local RET = {}
 
@@ -39,10 +31,9 @@ local RET = {}
     --"new": false
   --}
 -- }
-NULSCAN_GETACCOUNT = "https://api.nuls.io"
-ADDRESS_LENGTH = 32
-CHAINID = 8964
-ACCOUNT_TYPE = 1
+local ADDRESS_LENGTH = 32
+local CHAINID = 8964
+local ACCOUNT_TYPE = 1
 
 function hex_dump (str)
     local len = string.len( str )
@@ -97,29 +88,20 @@ function validate_address(addr)
     return false
 end
 
-local ok, err = rds:connect("127.0.0.1", 6379)
-if not ok then
-    log(ERR, "failed to connect rds.")
-    RET.error = "internal error: rfailed."
-end
 
-local addr = args.acc
-if not addr then
-    log(ERR, "ERR not nuls address provided.")
-    ngx.say(cjson.encode({status = 1, error = "missing arguments"}))
-    return
-end
+function _M.main()
+    local args = ngx.req.get_uri_args()
+    local addr = args.acc
+    if not addr then
+--        log(ERR, "ERR not nuls address provided.")
+        return  {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
+    end
 
-ok, err = rds:get('nuls:account:'..addr)
-if not ok then
-    log(ERR, "get nuls address from rds failed: "..err)
-    RET.error = "internal error: rfailed."
-elseif ok == ngx.null then
-    log(ERR, "nuls address " .. addr .. " not found in rds")
+--    log(ERR, "nuls address " .. addr .. " not found in rds")
     --request from nulscan.com
-    local res, err = httpc:request_uri(NULSCAN_GETACCOUNT, {
+    local res, err = httpc:request_uri(config.NULSCAN_GETACCOUNT, {
         method = "POST",
-        headers = const.CAMO_UA,
+        headers = config.CAMO_UA,
         body = cjson.encode({
             jsonrpc = "2.0",
             method = "getAccount",
@@ -129,8 +111,8 @@ elseif ok == ngx.null then
     })
 
     if not res then
-        log(ERR, "request "..NULSCAN_GETACCOUNT.."failed")
-        return
+--        log(ERR, "request "..NULSCAN_GETACCOUNT.."failed")
+        return  {status = 1, error = "internal error.", code = debug.getinfo(1).currentline}
     end
 
     --log(ERR, ">>response: ".. res.status .. " " .. res.body)
@@ -165,9 +147,9 @@ elseif ok == ngx.null then
             RET.pledged = true
         else
             RET.pledged = false
-            local res, err = httpc:request_uri(NULSCAN_GETACCOUNT, {
+            local res, err = httpc:request_uri(config.NULSCAN_GETACCOUNT, {
                 method = "POST",
-                headers = const.CAMO_UA,
+                headers = config.CAMO_UA,
                 body = cjson.encode({
                     jsonrpc = "2.0",
                     method = "getAccountTxs",
@@ -185,28 +167,9 @@ elseif ok == ngx.null then
         end
     end
 
-    if not RET.error then
-        ok, err = rds:set('nuls:account:'..addr, cjson.encode(RET))
-        if not ok then
-            log(ERR, "save result to redis failed: "..err)
-        end
-        ok, err = rds:expire('nuls:account:'..addr, 300)
-        if not ok then
-            log(ERR, "set key expire failed")
-        end
-    end
-
     RET.status = 0
-else
-    log(ERR, "nuls address ".. addr .." found in cache")
-    RET = cjson.decode(ok)
-    RET.status = 0
+    return RET
 end
 
-local ok, err = rds:set_keepalive(30000, 100)
-if not ok then
-    RET.error = "internal error: rfailed."
-end
 
-ngx.say(cjson.encode(RET))
-
+return _M
