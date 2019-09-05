@@ -115,7 +115,7 @@ local function main()
             RET[k] = v
         end
 
-        if not RET.code then
+        if not RET.code and not RET.error then
             RET.code = 0
         end
         -- cache result
