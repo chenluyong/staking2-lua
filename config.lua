@@ -19,7 +19,11 @@ local _M = {
     --http://vapor.blockmeta.com/api/v1/address/vp1qcj7dzpjlnsg7pf24nj6pduar9dc24uxe8ywc9
     BYSTACK_RPC = "http://127.0.0.1:9889/",
     BYSTACK_GETACCOUNT = "https://vapor.blockmeta.com/api/v1/address/",
-    BYSTACK_GETTXS_PREFIX = "/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?limit=100"
+    BYSTACK_GETTXS_PREFIX = "/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?limit=100",
+
+
+    -- https://www.iostabc.com/endpoint/getAccount/hibarui/0
+    IOSTABC_GETACCOUNT = "https://www.iostabc.com/endpoint/getAccount/"
 
 
 }
