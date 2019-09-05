@@ -1,9 +1,11 @@
 local _M = {}
 
+_M.ROOT_PATH = "/usr/local/openresty/nginx/conf/staking2"
+
 
 -- get git commit count
 function _M.git_commit_count()
-    local sh = "git rev-list --all --count"
+    local sh = "git --git-dir=" .. _M.ROOT_PATH .. "/.git --work-tree=" .. _M.ROOT_PATH .. " rev-list --all --count"
     local t = io.popen(sh)
     local count = t:read("*all")
     return tonumber(count) or 0
@@ -11,11 +13,8 @@ end
 
 --
 local MAJOR_VERSION = 1
-local MINOR_VERSION = 0
+local MINOR_VERSION = 1
 local PATCH_VERSION = _M.git_commit_count()
-
-
-
 _M.VERSION = MAJOR_VERSION .. "." .. MINOR_VERSION .. "." .. PATCH_VERSION
 
 
@@ -45,8 +44,18 @@ _M.REDIS = {
     }
 }
 
-local DEBUG = true
+local DEBUG = false
 
+-- check local
+local t = io.popen("/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d 'addr:'")
+local a = t:read("*all")
+a = string.gsub(a, "^%s*(.-)%s*$", "%1")
+if a == "172.17.0.6" then
+    -- open dev
+    DEBUG = true
+end
+
+-- check DEBUG
 if DEBUG then
     _M.WANCHAIN_RPC = "http://192.168.1.93:18545"
     _M.REDIS.ip = "192.168.1.93"
