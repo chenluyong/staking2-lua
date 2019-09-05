@@ -1,31 +1,23 @@
 
 local cjson = require "cjson"
-local redis = require "resty.iredis"
-local rds = redis:new()
 local http = require "resty.ihttp"
 local httpc = http:new()
-local util = require "util"
+local util = require ("staking2.util")
+local config = require ("config")
 
+local _M = {}
 local string = string
 local table = table
-
-local CHAINX_DECIMAL = 100000000
-
-local CHAINX_RPC = "http://127.0.0.1:8081/chainx/"
-if jit and jit.os and jit.os == "OSX" then
-    CHAINX_RPC = "http://121.196.208.250:8081/chainx/" -- for local test
-end
 
 local RET = {}
 
 local function normalize(num, unit)
-    local unit = unit or CHAINX_DECIMAL
-    return tonumber(string.format("%f", num/CHAINX_DECIMAL))
+    local unit = unit or config.CHAINX_DECIMAL
+    return tonumber(string.format("%f", num/config.CHAINX_DECIMAL))
 end
 
-local ok, err = rds:get('chainx:nodes')
-if not ok then
-    local res, err = httpc:post(CHAINX_RPC, {
+function _M.main()
+    local res, err = httpc:post(config.CHAINX_RPC, {
         headers = {['Content-Type'] = 'application/json'},
         body = cjson.encode({
             id = 1,
@@ -35,7 +27,7 @@ if not ok then
         })
     })
     if not res then
-        RET.error = "request "..CHAINX_RPC.."failed: "..err
+        RET.error = "request "..config.CHAINX_RPC.."failed: "..err
     end
 
     local totalPower = 0
@@ -67,7 +59,7 @@ if not ok then
         end
     end
 
-    local res, err = httpc:post(CHAINX_RPC, {
+    local res, err = httpc:post(config.CHAINX_RPC, {
         headers = {['Content-Type'] = 'application/json'},
         body = cjson.encode({
             id = 1,
@@ -95,17 +87,6 @@ if not ok then
     end
 
     local nominator = {}
-    local ok, err = rds:smembers('chainx:nodeNominator')
-    if not ok then
-        util.log("chainx node nominator not found in redis: ", err)
-    else
-        for _, nodeNominator in pairs(ok) do
-            local _, _, id, voter = string.find(nodeNominator, "(%w+):(%d+)")
-            if id and voter then
-                nominator[id] = voter
-            end
-        end
-    end
 
     for _, nodeinfo in pairs(RET) do
         local userYield = 1 / totalPower * 14400 * 0.9 * 0.8 * 365
@@ -117,18 +98,7 @@ if not ok then
         end
     end
 
-    if not RET.error then
-        ok, err = rds:set('chainx:nodes', cjson.encode(RET))
-        if not ok then
-            util.log("save result to redis failed: "..err)
-        end
-        ok, err = rds:expire('chainx:nodes:', 3600)
-        if not ok then
-            util.log("set key expire failed")
-        end
-    end
-else
-    RET = cjson.decode(ok)
+    return RET
 end
 
-ngx.say(cjson.encode(RET))
+return _M

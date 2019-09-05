@@ -3,8 +3,10 @@ local _M = {
 
     -- https://api.bystack.com/supernode/v1/sn-table
     BYSTACK_NODESINFO = "https://api.bystack.com/supernode/v1/sn-table",
-    BYSTACK_NODESDETAIL = "https://vapor.blockmeta.com/api/v1/nodes?page=1&limit=200"
+    BYSTACK_NODESDETAIL = "https://vapor.blockmeta.com/api/v1/nodes?page=1&limit=200",
 
+    CHAINX_RPC = "http://127.0.0.1:8081/chainx/",
+    CHAINX_DECIMAL = 100000000
 
 }
 
@@ -76,6 +78,7 @@ if DEBUG then
     _M.WANCHAIN_RPC = "http://192.168.1.93:18545"
     _M.REDIS.ip = "192.168.1.93"
     _M.WANCHAIN_NODESINFO = "http://192.168.1.93:80/nodes/wanchain"
+    _M.CHAINX_RPC = "http://121.196.208.250:8081/chainx/" -- for local test
 end
 
 
