@@ -54,6 +54,9 @@ _M.REDIS = {
     nodes = {
         wanchain = 3600, -- no cache, real-time
         default = 86400
+    },
+    tests = {
+        default = 0
     }
 }
 
