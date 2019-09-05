@@ -119,14 +119,16 @@ local function main()
             RET.code = 0
         end
         -- cache result
-        if not RET.error and not RET.warning then
+        if not RET.error and not RET.warning and request_type and request_blockchain then
             local expire_time = config.REDIS[request_type][request_blockchain]
-            if time ~= 0 then
+            if not expire_time then
+                expire_time = config.REDIS[request_type]['default']
+            end
+            if expire_time ~= 0 then
                 pcall(rds_set(ngx.var.request_uri, cjson.encode(RET), expire_time))
             end
         end
     end
-
 
     -- put it into the connection poll
     rds:set_keepalive(10000,100)
