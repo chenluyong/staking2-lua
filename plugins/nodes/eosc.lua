@@ -11,6 +11,27 @@ local table = table
 
 local RET = {}
 
+local function convert(_obj)
+--    local ret = _obj
+    local nodes = {}
+    for _,v in pairs(_obj) do
+        table.insert(nodes, {
+            alias = v.name,
+            alias_en = v.name,
+            pub_key = v.nodePubKey,
+            total_vote = v.totalVote,
+            node_type = v.type,
+            commission_fee = v.commissionFee * 100,
+            vote_percent = v.votePrecent,
+            website = v.homePage,
+            roi = v.userYield,
+            rank = v.rank
+        })
+    end
+    local ret = { nodes = nodes }
+    return ret
+end
+
 local function split(str, sep)
     if sep == nil then
         sep = "%s"
@@ -45,7 +66,7 @@ function _M.main()
     if not res then
         RET.error = "request "..config.EOSC_NODESINFO.."failed: "..err
     end
-
+--local detail = {}
     local nodesinfo = {}
     local totalvoted = 0
 
@@ -65,6 +86,7 @@ function _M.main()
         end
     end
 
+--detail.st = ret
     for _, node in pairs(nodesinfo) do
         if node.totalVote == 0 then
             node.votePrecent = 0
@@ -95,9 +117,10 @@ function _M.main()
         end
         nodesinfo[i].rank = i
     end
-
-    RET = nodesinfo
-    return RET
+--RET.detail = detail
+--RET.nodes = nodesinfo
+--    RET = nodesinfo
+    return convert(nodesinfo)
 end
 
 return _M
