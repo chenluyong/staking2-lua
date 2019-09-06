@@ -28,6 +28,7 @@ local _M = {
 
     -- https://www.iostabc.com/endpoint/getAccount/hibarui/0
      IOSTABC_GETACCOUNT = "https://www.iostabc.com/endpoint/getAccount/",
+     IOSTABC_GETTOTALVOTE = "https://www.iostabc.com/api/vote/votes",
 
      NULSCAN_GETACCOUNT = "https://api.nuls.io"
 
