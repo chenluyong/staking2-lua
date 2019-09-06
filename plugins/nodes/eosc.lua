@@ -22,7 +22,7 @@ local function convert(_obj)
             total_vote = v.totalVote,
             node_type = v.type,
             commission_fee = v.commissionFee * 100,
-            vote_percent = v.votePrecent,
+            vote_percent = v.votePrecent * 100,
             website = v.homePage,
             roi = v.userYield,
             rank = v.rank
