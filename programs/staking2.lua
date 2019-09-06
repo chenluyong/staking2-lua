@@ -119,6 +119,8 @@ local function main()
                 expire_time = config.REDIS[request_type]['default']
             end
             if expire_time ~= 0 then
+                -- tpis: for now that's all.
+                --       after tactics cache,
                 pcall(rds_set(ngx.var.request_uri, cjson.encode(RET), expire_time))
             end
         end
