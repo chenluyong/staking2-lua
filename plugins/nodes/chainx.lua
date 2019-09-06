@@ -18,6 +18,8 @@ local function convert(_obj)
            alias = v.name,
            alias_en = v.name,
            pub_key = "0x" .. v.accountId,
+           -- tips: this should be `base58`,
+           --       but too troublesome.
            address = "0x" .. v.accountId,
            total_vote = v.totalVote,
            website = v.url,
