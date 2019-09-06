@@ -56,7 +56,7 @@ _M.CAMO_UA = {['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/
 
 
 _M.CHAINX_GETACCOUNT = "https://api.chainx.org.cn/account"
-_M.CHAINX_ACCOUNT_PY = "/usr/local/openresty/nginx/conf/staking2/libraries/scripts/chainx.py"
+_M.CHAINX_ACCOUNT_PY = _M.ROOT_PATH .. "/libraries/scripts/chainx.py"
 
 _M.IOST_NODESINFO = "https://www.iostabc.com/api/producers"
 
@@ -75,13 +75,10 @@ _M.REDIS = {
     default_time = 1200,
     close_accounts = {
         wanchain = 0, -- no cache, real-time
-        default  = 1200 -- default 20 minutes timeout
+        default  = 600 -- default 20 minutes timeout
     },
     nodes = {
         vapor = 86400, -- one day
-        default = 0
-    },
-    close_tests = {
         default = 0
     }
 }
