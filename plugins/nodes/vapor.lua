@@ -43,7 +43,7 @@ function _M.main_vapor()
                 description = "",
                 description_en = "",
                 total_vote = item.vote_count,
-                headcount = 0,
+                voters = 0,
                 roi = tonumber(item.ratio),
                 pub_key = item.pub_key
             }
@@ -63,7 +63,7 @@ function _M.main_vapor()
                     nodes[item.pub_key].description = ret.data.super_node_detail.introduce
                     nodes[item.pub_key].description_en = ret.data.super_node_detail.introduce_en
                     nodes[item.pub_key].logo = ret.data.super_node_detail.logo
-                    nodes[item.pub_key].headcount = ret.data.pagination.total
+                    nodes[item.pub_key].voters = ret.data.pagination.total
                 end
             end
 --[[]]--
