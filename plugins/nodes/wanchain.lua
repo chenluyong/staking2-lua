@@ -4,6 +4,39 @@ local _M = {}
 local cjson = require "cjson"
 local config = require "config"
 
+
+local function sort_by_vote(a, b)
+    return a.total_vote > b.total_vote
+end
+
+
+local function convert_dto(_obj)
+    local ret = {}
+    local nodes = {}
+    for _, v in pairs(_obj.result) do
+--        if (v.clients_size + v.partners_size) > 0 then
+            table.insert(nodes,{
+            --    alias = v.address,
+            --    alias_en = v.address,
+                address = v.address,
+                total_vote = v.total_stake,
+                voters = v.clients_size + v.partners_size,
+                commission_fee = v.fee_rate,
+                vote_percent = v.stake_weight
+            })
+--        end
+    end
+
+    table.sort(nodes, sort_by_vote)
+    for i=1, #nodes do
+        nodes[i].rank = i
+    end
+
+    ret.nodes = nodes
+    return ret
+end
+
+
 local function gwan_rpc(_method, _params)
    
     local http = require 'resty.http'
@@ -56,12 +89,12 @@ local function convert_stake(_rpc)
     end
 
     for _, value in pairs(_nodesObj) do
-        value.stake_weight = string.format("%.2f%%", (value.total_stake / full_stake * 100))
+        value.stake_weight = tonumber(string.format("%.4f", (value.total_stake / full_stake * 100)))
         value.max_fee_rate = value.maxFeeRate / 100
         value.fee_rate = value.feeRate / 100
     end
 
-    _rpc.full_stake = string.format("%0.2f",full_stake)
+    _rpc.full_stake = tonumber(string.format("%0.4f",full_stake))
     return _rpc
 end
 
@@ -85,7 +118,8 @@ local function get_producers(_requestUri)
     -- convert params
     local ret_obj = convert_stake(cjson.decode(res.body))
 
-    return ret_obj
+
+    return convert_dto(ret_obj)
 end
 
 
