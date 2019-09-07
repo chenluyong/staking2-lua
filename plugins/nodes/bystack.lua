@@ -78,8 +78,8 @@ local detail = {}
                     nodeinfo[name].type = node.type
                     --nodeinfo[name].ip = node.address
                     nodeinfo[name].pub_key = node.pub_key
-                    nodeinfo[name].user_yield = node.expected_return
-                    nodeinfo[name].vote_percent = tonumber(string.format("%.4f", node.vote_count / netTotalVote))
+                    nodeinfo[name].roi = tonumber(node.expected_return)
+                    nodeinfo[name].vote_percent = tonumber(string.format("%.4f", node.vote_count / netTotalVote)) * 100
                 else
 --                    log(ERR, ">>name: '"..name.."' not found")
                 end
