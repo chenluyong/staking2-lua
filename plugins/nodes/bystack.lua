@@ -19,7 +19,7 @@ function _M.main_btm()
         method = "GET",
         headers = config.CAMO_UA
     })
-local detail = {}
+--local detail = {}
     if not res then
 --        log(ERR, "request" .. BYSTACK_NODESINFO .. "failed: " .. err )
         RET.error = "request " .. config.BYSTACK_NODESINFO .. "failed: " .. err
@@ -78,7 +78,7 @@ local detail = {}
                     nodeinfo[name].type = node.type
                     --nodeinfo[name].ip = node.address
                     nodeinfo[name].pub_key = node.pub_key
-                    nodeinfo[name].roi = tonumber(node.expected_return)
+                    nodeinfo[name].roi = (node.expected_return)
                     nodeinfo[name].vote_percent = tonumber(string.format("%.4f", node.vote_count / netTotalVote)) * 100
                 else
 --                    log(ERR, ">>name: '"..name.."' not found")
