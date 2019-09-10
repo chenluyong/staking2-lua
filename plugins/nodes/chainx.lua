@@ -10,6 +10,27 @@ local string = string
 local table = table
 
 local RET = {}
+local function convert(_obj)
+    local RET = { nodes = {} }
+--    RET.nodes = _obj
+    for _, v in pairs(_obj) do
+        table.insert(RET.nodes,{
+           alias = v.name,
+           alias_en = v.name,
+           pub_key = "0x" .. v.accountId,
+           -- tips: this should be `base58`,
+           --       but too troublesome.
+           address = "0x" .. v.accountId,
+           total_vote = v.totalVote,
+           website = v.url,
+           statement = v.about,
+           statement_en = v.about,
+           node_type = v.nodeType
+        })
+    end
+    return RET
+end
+
 
 local function normalize(num, unit)
     local unit = unit or config.CHAINX_DECIMAL
@@ -17,6 +38,7 @@ local function normalize(num, unit)
 end
 
 function _M.main()
+--local detail = {}
     local res, err = httpc:post(config.CHAINX_RPC, {
         headers = {['Content-Type'] = 'application/json'},
         body = cjson.encode({
@@ -26,16 +48,20 @@ function _M.main()
             params = setmetatable({}, cjson.empty_array_mt)
         })
     })
-    if not res then
-        RET.error = "request "..config.CHAINX_RPC.."failed: "..err
+    local ok = string.find(res,"<html>")
+
+    if not res or ok then
+        RET.error = "request "..config.CHAINX_RPC.."failed: ".. (err or "unanticipated response.") 
+        RET.error_teail = res
+        return RET
     end
 
     local totalPower = 0
-
     local ret = cjson.decode(res)
     if ret.error then
         RET.error = string.format("rpc error %s", ret.err.message)
     else
+--detail.st = ret
         for _, node in pairs(ret.result) do
             repeat
                 if node and #node.isTrustee ~= 0 then
@@ -51,8 +77,10 @@ function _M.main()
                 table.insert(RET, {
                     name = node.name,
                     nodeType = nodeType,
+                    url = node.url,
                     totalVote = normalize(node.totalNomination),
                     selfVote = normalize(node.selfVote),
+                    about = node.about,
                     accountId = string.sub(node.account, 3, -1)
                 })
             until true
@@ -74,6 +102,7 @@ function _M.main()
     --util.log(res)
 
     local ret = cjson.decode(res)
+--detail.nd = ret
     if ret.error then
         RET.error = string.format("rpc error %s", ret.err.message)
     else
@@ -97,7 +126,8 @@ function _M.main()
             util.log(string.format("> node %s[%s] voter was missing", nodeinfo.name, nodeinfo.accountId))
         end
     end
-
+    RET = convert(RET)
+--RET.detail = detail
     return RET
 end
 

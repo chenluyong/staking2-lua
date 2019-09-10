@@ -67,8 +67,8 @@ local function convert(_obj)
         table.insert(keys, k or 0)
     end
     ret.keys = keys
-]]--
     ret.source = _obj.producers
+]]--
     ret.nodes = nodes
     return ret
 end

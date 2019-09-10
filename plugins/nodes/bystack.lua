@@ -19,7 +19,7 @@ function _M.main_btm()
         method = "GET",
         headers = config.CAMO_UA
     })
-
+--local detail = {}
     if not res then
 --        log(ERR, "request" .. BYSTACK_NODESINFO .. "failed: " .. err )
         RET.error = "request " .. config.BYSTACK_NODESINFO .. "failed: " .. err
@@ -31,6 +31,7 @@ function _M.main_btm()
 --        log(ERR, "bystack api return error, abort: "..ret.error)
         RET.error = ret.error
     else
+--detail.st = ret
         local nodeinfo = {}
         
         for _, node in pairs(ret.data) do
@@ -38,8 +39,15 @@ function _M.main_btm()
                 nodeinfo[node.name] = {
                     alias = node.name,
                     alias_en = node.name,
+                    company_type = node.node_type,
+                    company_type_en = node.node_type_en,
+                    address = node.wallet_address,
                     description = node.introduce,
                     description_en = node.introduce,
+                    statement = node.declaration,
+                    statement_en = node.declaration_en,
+                    location = node.location,
+                    location_en = node.location_en,
                     logo = string.format("https://api.bystack.com/supernode/v1%s", node.reserved_1),
                     --vote_amount = node.vote_count / 100000000,
                     --vote_percent = tonumber(string.format("%.4f", node.percent)),
@@ -50,7 +58,6 @@ function _M.main_btm()
                 }
             end
         end
-
         local res, err = httpc:request_uri(config.BYSTACK_NODESDETAIL, {
             method = "GET",
             headers = config.CAMO_UA
@@ -61,7 +68,7 @@ function _M.main_btm()
         end
 
         local ret = cjson.decode(res.body)
-
+--detail.nd = ret
         if ret.code and ret.code == 200 then
             local netTotalVote = ret.data.vote_total_count
             for _, node in pairs(ret.data.lists) do
@@ -71,8 +78,8 @@ function _M.main_btm()
                     nodeinfo[name].type = node.type
                     --nodeinfo[name].ip = node.address
                     nodeinfo[name].pub_key = node.pub_key
-                    nodeinfo[name].user_yield = node.expected_return
-                    nodeinfo[name].vote_percent = tonumber(string.format("%.4f", node.vote_count / netTotalVote))
+                    nodeinfo[name].roi = (node.expected_return)
+                    nodeinfo[name].vote_percent = tonumber(string.format("%.4f", node.vote_count / netTotalVote)) * 100
                 else
 --                    log(ERR, ">>name: '"..name.."' not found")
                 end
@@ -86,6 +93,7 @@ function _M.main_btm()
         end
 
     end
+--RET.detail = detail
     return convert(RET)
 end
 
