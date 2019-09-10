@@ -82,7 +82,17 @@ _M.REDIS = {
         default = 0
     }
 }
-
+_M.STD_HEADERS = {
+    ['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
+    ['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+    ['Accept-Encoding'] = 'gzip, deflate',
+    ['Cookie'] = '_ga=GA1.1.1939310461.1565671653',
+    ['Accept-Language'] = 'zh-CN,zh;q=0.9,en;q=0.8',
+    ['Upgrade-Insecure-Requests'] = '1',
+    ['Connection'] = 'keep-alive',
+    ['Host'] = 'api.binance.com',
+    ['Cache-Control'] = 'no-cache'
+}
 local DEBUG = false
 
 -- check local
