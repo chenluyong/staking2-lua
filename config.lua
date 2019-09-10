@@ -1,5 +1,5 @@
 local _M = {
-    ROOT_PATH = "/usr/local/openresty/nginx/conf/staking2",
+    ROOT_PATH = "/usr/local/openresty/nginx/conf/new_staking2",
 
     -- https://api.bystack.com/supernode/v1/sn-table
     BYSTACK_NODESINFO = "https://api.bystack.com/supernode/v1/sn-table",
@@ -34,7 +34,6 @@ local _M = {
 
 }
 
-_M.ROOT_PATH = "/usr/local/openresty/nginx/conf/staking2"
 
 
 -- get git commit count
@@ -56,7 +55,7 @@ _M.CAMO_UA = {['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/
 
 
 _M.CHAINX_GETACCOUNT = "https://api.chainx.org.cn/account"
-_M.CHAINX_ACCOUNT_PY = "/usr/local/openresty/nginx/conf/staking2/libraries/scripts/chainx.py"
+_M.CHAINX_ACCOUNT_PY = _M.ROOT_PATH .. "/libraries/scripts/chainx.py"
 
 _M.IOST_NODESINFO = "https://www.iostabc.com/api/producers"
 
