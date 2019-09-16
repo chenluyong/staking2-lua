@@ -72,13 +72,16 @@ _M.REDIS = {
     port = 6379,
     timeout = 1000,
     default_time = 1200,
-    close_accounts = {
+    accounts = {
         wanchain = 0, -- no cache, real-time
-        default  = 600 -- default 20 minutes timeout
+        default  = 60 -- default 20 minutes timeout
     },
     nodes = {
         vapor = 86400, -- one day
-        default = 0
+        bystack = 86400,
+        wanchain = 600,
+        iost = 3600,
+        default = 86400
     }
 }
 _M.STD_HEADERS = {
