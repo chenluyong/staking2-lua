@@ -29,10 +29,10 @@ local function convert(_obj)
            website = v.url,
            statement = v.about,
            statement_en = v.about,
+           roi = v.userYield,
            node_type = v.nodeType
         })
     end
-    
     table.sort(nodes, sort_by_vote)
     for i=1, #nodes do
         nodes[i].rank = i
@@ -47,7 +47,7 @@ local function normalize(num, unit)
 end
 
 function _M.main()
-local detail = {}
+--local detail = {}
     local res, err = httpc:post(config.CHAINX_RPC, {
         headers = {['Content-Type'] = 'application/json'},
         body = cjson.encode({
@@ -70,7 +70,7 @@ local detail = {}
     if ret.error then
         RET.error = string.format("rpc error %s", ret.err.message)
     else
-detail.st = ret
+--detail.st = ret
         for _, node in pairs(ret.result) do
             repeat
                 if node and #node.isTrustee ~= 0 then
@@ -111,7 +111,7 @@ detail.st = ret
     --util.log(res)
 
     local ret = cjson.decode(res)
-detail.nd = ret
+--detail.nd = ret
     if ret.error then
         RET.error = string.format("rpc error %s", ret.err.message)
     else
@@ -136,7 +136,7 @@ detail.nd = ret
         end
     end
     RET = convert(RET)
-RET.detail = detail
+--RET.detail = detail
     return RET
 end
 
