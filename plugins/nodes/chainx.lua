@@ -10,11 +10,15 @@ local string = string
 local table = table
 
 local RET = {}
+
+local function sort_by_vote(a, b)
+    return a.total_vote > b.total_vote
+end
+
 local function convert(_obj)
-    local RET = { nodes = {} }
---    RET.nodes = _obj
+    local nodes = {}
     for _, v in pairs(_obj) do
-        table.insert(RET.nodes,{
+        table.insert(nodes,{
            alias = v.name,
            alias_en = v.name,
            pub_key = "0x" .. v.accountId,
@@ -28,7 +32,12 @@ local function convert(_obj)
            node_type = v.nodeType
         })
     end
-    return RET
+    
+    table.sort(nodes, sort_by_vote)
+    for i=1, #nodes do
+        nodes[i].rank = i
+    end
+    return {nodes = nodes}
 end
 
 
@@ -38,7 +47,7 @@ local function normalize(num, unit)
 end
 
 function _M.main()
---local detail = {}
+local detail = {}
     local res, err = httpc:post(config.CHAINX_RPC, {
         headers = {['Content-Type'] = 'application/json'},
         body = cjson.encode({
@@ -61,7 +70,7 @@ function _M.main()
     if ret.error then
         RET.error = string.format("rpc error %s", ret.err.message)
     else
---detail.st = ret
+detail.st = ret
         for _, node in pairs(ret.result) do
             repeat
                 if node and #node.isTrustee ~= 0 then
@@ -102,7 +111,7 @@ function _M.main()
     --util.log(res)
 
     local ret = cjson.decode(res)
---detail.nd = ret
+detail.nd = ret
     if ret.error then
         RET.error = string.format("rpc error %s", ret.err.message)
     else
@@ -127,7 +136,7 @@ function _M.main()
         end
     end
     RET = convert(RET)
---RET.detail = detail
+RET.detail = detail
     return RET
 end
 
