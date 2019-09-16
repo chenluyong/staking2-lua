@@ -70,11 +70,9 @@ local function main()
     local request_type = request_table[1]
     local request_module = request_table[2]
     local path = request_type .. "." .. request_module
+    
 
     local ok, err = pcall(function()
-        --[[
-        get info
-        --]]
         -- get cache
         local ret = rds_get(request_all_uri)
         if ret ~= nil and ret ~= ngx.null then
@@ -83,15 +81,15 @@ local function main()
 
         -- call
         local lua = require(path)
-        local ret_table = lua.main()
-
-        --[[
-        check
-        --]]
+        local ret_table = {}
+        pcall(function()
+            ret_table = lua.main() 
+        end
+        )
+        RET.code = lua.code
 
         return ret_table
     end
-    --, function() RET.tracebak = debug.traceback() end, 133
     )
 
     -- alias

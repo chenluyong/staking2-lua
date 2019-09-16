@@ -6,6 +6,8 @@ local config = require ("config")
 local _M = {}
 
 
+_M.code = debug.getinfo(1).currentline
+
 local RET = {}
 
 local function convert(_t)
@@ -15,6 +17,7 @@ local function convert(_t)
 end
 
 function _M.main_btm()
+_M.code = debug.getinfo(1).currentline
     local res, err = httpc:request_uri(config.BYSTACK_NODESINFO, {
         method = "GET",
         headers = config.CAMO_UA
@@ -24,6 +27,7 @@ function _M.main_btm()
 --        log(ERR, "request" .. BYSTACK_NODESINFO .. "failed: " .. err )
         RET.error = "request " .. config.BYSTACK_NODESINFO .. "failed: " .. err
     end
+_M.code = debug.getinfo(1).currentline
 
     local ret = cjson.decode(res.body)
 
@@ -33,7 +37,9 @@ function _M.main_btm()
     else
 --detail.st = ret
         local nodeinfo = {}
-        
+
+_M.code = debug.getinfo(1).currentline
+
         for _, node in pairs(ret.data) do
             if node.name ~= "-" then
                 nodeinfo[node.name] = {
@@ -69,6 +75,8 @@ function _M.main_btm()
 
         local ret = cjson.decode(res.body)
 --detail.nd = ret
+_M.code = debug.getinfo(1).currentline
+
         if ret.code and ret.code == 200 then
             local netTotalVote = ret.data.vote_total_count
             for _, node in pairs(ret.data.lists) do
@@ -93,12 +101,17 @@ function _M.main_btm()
         end
 
     end
+
+_M.position = debug.getinfo(1).currentline
+
 --RET.detail = detail
     return convert(RET)
 end
 
 function _M.main()
-    return _M.main_btm()
+    ret = _M.main_btm()
+_M.code = 0
+    return ret
 end
 
 
