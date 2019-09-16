@@ -77,7 +77,7 @@ end
 function _M.main()
     -- get nodes info
     args_len = #ngx.var.request_uri - #ngx.var.uri + 1
-    local args = "?page=1&size=50&sort_by=votes&order=desc&search="
+    local args = "?page=1&size=400&sort_by=votes&order=desc&search="
     if args_len > 3 then
         args = string.sub(ngx.var.request_uri, #ngx.var.uri + 1, #ngx.var.request_uri)
     end
