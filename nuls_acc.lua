@@ -39,7 +39,7 @@ local RET = {}
     --"new": false
   --}
 -- }
-NULSCAN_GETACCOUNT = "https://api.nuls.io"
+NULSCAN_GETACCOUNT = "https://nulscan.io/api/"
 ADDRESS_LENGTH = 32
 CHAINID = 8964
 ACCOUNT_TYPE = 1
@@ -117,13 +117,23 @@ if not ok then
 elseif ok == ngx.null then
     log(ERR, "nuls address " .. addr .. " not found in rds")
     --request from nulscan.com
+--    log(ERR, "request body: " .. cjson.encode({
+--            jsonrpc = "2.0",
+--            method = "getAccount",
+--            params = {1,addr},
+--            id = 5898
+--        }) .. "\n\t" .. NULSCAN_GETACCOUNT)
+
     local res, err = httpc:request_uri(NULSCAN_GETACCOUNT, {
         method = "POST",
-        headers = const.CAMO_UA,
+        headers = {
+            ['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
+            ['Content-Type'] = "application/json"
+        },
         body = cjson.encode({
             jsonrpc = "2.0",
             method = "getAccount",
-            params = {addr},
+            params = {1,addr},
             id = 5898
         })
     })
@@ -133,7 +143,7 @@ elseif ok == ngx.null then
         return
     end
 
-    --log(ERR, ">>response: ".. res.status .. " " .. res.body)
+--    log(ERR, ">>response: \n\t".. res.status .. " \n\t" .. res.body)
 
     --if res.status ~= 200 then
         --RET.exist = false
