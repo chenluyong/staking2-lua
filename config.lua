@@ -112,6 +112,8 @@ if DEBUG then
     _M.REDIS.ip = "192.168.1.93"
     _M.WANCHAIN_NODESINFO = "http://192.168.1.93:80/nodes/wanchain"
     _M.CHAINX_RPC = "http://121.196.208.250:8081/chainx/" -- for local test
+    _M.REDIS.nodes = nil -- real-time
+    _M.REDIS.accounts = nil -- real-time
 end
 
 
