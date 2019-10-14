@@ -30,7 +30,7 @@ local _M = {
      IOSTABC_GETACCOUNT = "https://www.iostabc.com/endpoint/getAccount/",
      IOSTABC_GETTOTALVOTE = "https://www.iostabc.com/api/vote/votes",
 
-     NULSCAN_GETACCOUNT = "https://api.nuls.io"
+     NULSCAN_GETACCOUNT = "https://nulscan.io/api/"
 
 }
 
