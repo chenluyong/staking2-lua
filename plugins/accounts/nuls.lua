@@ -5,6 +5,9 @@ local http = require "resty.http"
 local httpc = http.new()
 local config = require ("config")
 
+local log = ngx.log
+local ERR = ngx.ERR
+
 local _M = {}
 
 local RET = {}
@@ -90,6 +93,8 @@ end
 
 
 function _M.main()
+_M.code = debug.getinfo(1).currentline 
+--    if true then return {a="a"} end
     local args = ngx.req.get_uri_args()
     local addr = args.acc
     if not addr then
@@ -97,25 +102,37 @@ function _M.main()
         return  {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
     end
 
+_M.code = debug.getinfo(1).currentline
 --    log(ERR, "nuls address " .. addr .. " not found in rds")
     --request from nulscan.com
+--if true then    return{error= "request body: " .. cjson.encode({
+--            jsonrpc = "2.0",
+--            method = "getAccount",
+--            params = {1,addr},
+--            id = 5898
+--        }) .. "\n\t" .. config.NULSCAN_GETACCOUNT}end
     local res, err = httpc:request_uri(config.NULSCAN_GETACCOUNT, {
         method = "POST",
-        headers = config.CAMO_UA,
+        headers = {
+            ['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
+            ['Content-Type'] = "application/json"
+        },
         body = cjson.encode({
             jsonrpc = "2.0",
             method = "getAccount",
-            params = {addr},
+            params = {1,addr},
             id = 5898
         })
     })
-
+--log(ERR,"error test")
+_M.code = debug.getinfo(1).currentline 
     if not res then
---        log(ERR, "request "..NULSCAN_GETACCOUNT.."failed")
+        log(ERR, "request "..NULSCAN_GETACCOUNT.."failed")
+--return {a="b"}
         return  {status = 1, error = "internal error.", code = debug.getinfo(1).currentline}
     end
 
-    --log(ERR, ">>response: ".. res.status .. " " .. res.body)
+    log(ERR, ">>response: ".. res.status .. " " .. res.body)
 
     --if res.status ~= 200 then
         --RET.exist = false
@@ -124,6 +141,7 @@ function _M.main()
         --RET.exist = true
     --end
 
+_M.code = debug.getinfo(1).currentline 
     local ret = cjson.decode(res.body)
     if ret and ret.error then
         if not validate_address(addr) then
@@ -168,6 +186,7 @@ function _M.main()
     end
 
     RET.status = 0
+_M.code = 0
     return RET
 end
 
