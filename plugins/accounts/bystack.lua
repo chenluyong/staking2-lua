@@ -10,6 +10,39 @@ local _M = {}
 local RET = {}
 local ADDRESS_LENGTH = 42
 
+
+local function get_24_hour(account)
+    http = require "resty.http"
+    httpc = http.new()
+
+    local req_uri = string.format("https://vapor.blockmeta.com/api/v1/address/%s/trx/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", account)
+    local res, err = httpc:request_uri(req_uri, {
+        method = "GET",
+        headers = config.CAMO_UA
+    })
+    if not res then
+        return {status = 1, error = "request "..req_uri.."failed", code = debug.getinfo(1).currentline}
+    end
+
+    local ret = cjson.decode(res.body)
+    local time_with_24_hour = os.time() - (24 * 60 * 60)
+
+    if ret and ret.code == 200 then
+        local amount_24_hour = 0
+        for _, action in pairs(ret.data.transactions) do
+            if time_with_24_hour < (action.timestamp / 1000) and not action.is_vote then
+                for _, output in pairs(action.outputs) do
+                    if output.address == account and output.symbol == "BTM" then
+                        amount_24_hour = amount_24_hour + (output.amount / 100000000)
+                    end
+                end
+            end
+        end
+       return amount_24_hour
+    end
+end
+
+
 function hex_dump (str)
     local len = string.len( str )
     local dump = ""
@@ -150,7 +183,7 @@ function _M.main()
             --RET.pledged = false
         --end
     end
-
+    RET.recentFunding = get_24_hour(addr)
     RET.status = 0
     return RET
 end

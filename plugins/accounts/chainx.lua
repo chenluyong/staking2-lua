@@ -29,6 +29,36 @@ local function bin2hex(s)
     return s
 end
 
+local function get_24_hour(account)
+    http = require "resty.http"
+    httpc = http.new()
+
+    local req_uri = string.format("https://api.chainx.org.cn/account/0x%s/transfers?page=0&page_size=20", account)
+    local res, err = httpc:request_uri(req_uri, {
+        method = "GET",
+        headers = config.CAMO_UA,
+    ssl_verify = false})
+    if not res then
+        return {status = 1, error = "request "..req_uri.." failed", code = debug.getinfo(1).currentline, res = cjson.encode(res), err = err}
+    end
+
+    local ret = cjson.decode(res.body)
+    local time_with_24_hour = os.time() - (24 * 60 * 60)
+
+    if ret then
+        local amount_24_hour = 0
+        for _,action in pairs(ret.items) do
+            local timestamp = action.time / 1000;
+            if time_with_24_hour < timestamp then
+                if action.payee == account then
+                    amount_24_hour = amount_24_hour + tonumber(action.value) / 100000000
+                end
+            end
+        end
+       return amount_24_hour
+    end
+    return 0
+end
 
 
 -- get account info
@@ -53,6 +83,7 @@ local function get_info(acc)
 --    if (ret_obj["status"] ~= 0) then
         --log(ERR,a)
 --    end
+    ret_obj.recentFunding = get_24_hour(adr)
     return ret_obj
 end
 
@@ -69,6 +100,7 @@ function _M.main()
     end
 
     ret = get_info(acc)
+_M.code = 0
     return ret
 end
 

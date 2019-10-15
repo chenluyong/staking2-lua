@@ -2,12 +2,12 @@ local http = require("resty.ihttp")
 local httpc = http:new()
 local cjson = require("cjson")
 local config = require("config")
+local redis = require("resty.redis")
 local _M = {}
 
 
 function _M.price(_coin_pair)
-    local coin_pair = string.upper(_coin_pair)
-    url = "https://api.binance.com/api/v3/ticker/bookTicker?symbol=WANUSDT"--..coin_pair
+    url = "http://web.juhe.cn:8080/finance/exchange/rmbquot?type=&bank=&key=496b8de4e4c9ee2f5bc889852f7cfd03"
     --if true then return {url = url} end
     local res, err = httpc:get(url,{
           timeout = 5--,

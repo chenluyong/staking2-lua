@@ -38,6 +38,57 @@ local ADDRESS_LENGTH = 32
 local CHAINID = 8964
 local ACCOUNT_TYPE = 1
 
+
+local function get_24_hour(account)
+    http = require "resty.http"
+    httpc = http.new()
+
+_M.code = debug.getinfo(1).currentline
+    local res, err = httpc:request_uri(config.NULSCAN_GETACCOUNT, {
+        method = "POST",
+        headers = {
+            ['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
+            ['Content-Type'] = "application/json"
+        },
+        body = cjson.encode({
+            jsonrpc = "2.0",
+            method = "getAccountTxs",
+            params = {1,1,20,account,0,-1,-1},
+            id = 5898
+        })
+    })
+
+_M.code = debug.getinfo(1).currentline
+    if not res then
+        return {status = 1, error = "request "..req_uri.."failed", code = debug.getinfo(1).currentline}
+    end
+
+    local ret = cjson.decode(res.body)
+    local time_with_24_hour = os.time() - (24 * 60 * 60)
+
+_M.code = debug.getinfo(1).currentline
+
+log(ERR, ">>response: ".. res.status .. " " .. res.body)
+    if ret then
+        local amount_24_hour = 0
+        for _,action in pairs(ret.result.list) do
+            local timestamp = action.createTime;
+_M.code = debug.getinfo(1).currentline
+            if time_with_24_hour < timestamp then
+_M.code = debug.getinfo(1).currentline
+                if action.type == 2 and action.transferType == 1 then
+                    if action.address == account then
+                        amount_24_hour = amount_24_hour + (action.values / config.NULSCAN_DECIMAL)
+                    end
+                end
+            end
+        end
+        return amount_24_hour
+    end
+_M.code = debug.getinfo(1).currentline
+end
+
+
 function hex_dump (str)
     local len = string.len( str )
     local dump = ""
@@ -125,6 +176,7 @@ _M.code = debug.getinfo(1).currentline
         })
     })
 --log(ERR,"error test")
+
 _M.code = debug.getinfo(1).currentline 
     if not res then
         log(ERR, "request "..NULSCAN_GETACCOUNT.."failed")
@@ -132,7 +184,8 @@ _M.code = debug.getinfo(1).currentline
         return  {status = 1, error = "internal error.", code = debug.getinfo(1).currentline}
     end
 
-    log(ERR, ">>response: ".. res.status .. " " .. res.body)
+_M.code = debug.getinfo(1).currentline 
+--    log(ERR, ">>response: ".. res.status .. " " .. res.body)
 
     --if res.status ~= 200 then
         --RET.exist = false
@@ -157,34 +210,45 @@ _M.code = debug.getinfo(1).currentline
             RET.pledged = false
         end
     else
-        RET.balance = ret.result.totalBalance / 100000000
-        RET.balanceTotal = ret.result.totalBalance / 100000000
-        RET.balanceLocking = (ret.result.consensusLock + ret.result.timeLock) / 100000000
-        RET.balanceUsable = ret.result.balance / 100000000
+_M.code = debug.getinfo(1).currentline 
+        RET.balance = ret.result.totalBalance / config.NULSCAN_DECIMAL 
+        RET.balanceTotal = ret.result.totalBalance / config.NULSCAN_DECIMAL
+        RET.balanceLocking = (ret.result.consensusLock + ret.result.timeLock) / config.NULSCAN_DECIMAL
+        RET.balanceUsable = ret.result.balance / config.NULSCAN_DECIMAL
         if ret.result.consensusLock > 0 then
             RET.pledged = true
         else
+_M.code = debug.getinfo(1).currentline 
             RET.pledged = false
             local res, err = httpc:request_uri(config.NULSCAN_GETACCOUNT, {
                 method = "POST",
-                headers = config.CAMO_UA,
+                headers = {
+                    ['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
+                    ['Content-Type'] = "application/json"
+                },
                 body = cjson.encode({
                     jsonrpc = "2.0",
                     method = "getAccountTxs",
-                    params = {1, 10, addr, 0, true}, -- page,size,addr,?,hide consensus txs
+--                    params = {1, 10, addr, 0, true}, -- page,size,addr,?,hide consensus txs
+                    params = {1,1,20,addr,0,-1,-1},
                     id = 5898
                 })
             })
-            --log(ERR, ">>response: ".. res.status .. " " .. res.body)
+_M.code = debug.getinfo(1).currentline 
+--            log(ERR, ">>response: ".. res.status .. " " .. res.body)
             local ret = cjson.decode(res.body)
+_M.code = debug.getinfo(1).currentline 
             for _, tx in pairs(ret.result.list) do
                 if tx.type == 5 or tx.type == 6 then
                     RET.pledged = true
                 end
             end
+_M.code = debug.getinfo(1).currentline 
         end
     end
 
+_M.code = debug.getinfo(1).currentline
+    RET.recentFunding = get_24_hour(addr)
     RET.status = 0
 _M.code = 0
     return RET
