@@ -13,18 +13,20 @@ end
 local function convert_dto(_obj)
     local ret = {}
     local nodes = {}
-    for _, v in pairs(_obj.result) do
---        if (v.clients_size + v.partners_size) > 0 then
+    for _, v in pairs(_obj.list) do
+        if not v.agentAlias or v.agentAlias == ngx.null then
+            v.agentAlias = string.upper(v.agentId)
+        end 
             table.insert(nodes,{
-            --    alias = v.address,
-            --    alias_en = v.address,
-                address = v.address,
-                total_vote = v.total_stake,
-                voters = v.clients_size + v.partners_size,
-                commission_fee = v.fee_rate,
-                vote_percent = v.stake_weight
+                alias = v.agentAlias,
+                alias_en = v.agentAlias,
+                address = v.agentAddress,
+                total_vote = v.totalDeposit / 100000000,
+                voters = v.depositCount,
+                note_type = "producer",
+                vote_percent = string.format("%.4f",v.totalDeposit / _obj.full_stake*100),
+                commission_fee = string.format("%.2f",v.commissionRate),
             })
---        end
     end
 
     table.sort(nodes, sort_by_vote)
@@ -42,7 +44,7 @@ local function rpc(_method, _params)
     local http = require 'resty.http'
     local httpc = http.new()
 
-    local res, err = httpc:request_uri(config.WANCHAIN_RPC, {
+    local res, err = httpc:request_uri(config.NULSCAN_GETACCOUNT, {
         method = "POST",
         headers = {
                 ['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
@@ -63,8 +65,8 @@ end
 -- self stake
 -- total stake
 local function convert_stake(_rpc)
-    local _nodesObj = _rpc.result
-    local full_stake = 0
+    if true then return _rpc.result end
+    local _nodesObj = _rpc.result.list
     -- convert stake
     for _, value in pairs(_nodesObj) do
         local total_stake = 0
@@ -107,14 +109,24 @@ local function get_producers(_requestUri)
     local res = rpc("getConsensusNodes",{1,1,200,0})
 
     if not res then
---        log(ERR, "request"..WANCHAIN_RPC.."failed")
-        return nil
+        log(ERR, "request nuls rpc failed")
+        return { error = "request nuls rpc failed" } 
     end
     -- convert params
     local ret_obj = convert_stake(cjson.decode(res.body))
+    
+    res = rpc("getCoinInfo",{1})
+    if not res then
+        log(ERR, "request `getCoinInfo` nuls rpc failed")
+        ret_obj.full_stake = 3629934121590815
+    else
+        ret_obj.full_stake = cjson.decode(res.body).result.consensusTotal
+    end
 
 
     return convert_dto(ret_obj)
+--    return cjson.decode(res.body)
+--    return ret_obj
 end
 
 
