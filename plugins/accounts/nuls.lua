@@ -153,6 +153,11 @@ _M.code = debug.getinfo(1).currentline
         return  {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
     end
 
+    if validate_address(addr) then
+        return  {status = 1, error = "invalid address arguments", code = debug.getinfo(1).currentline}
+    end
+
+
 _M.code = debug.getinfo(1).currentline
 --    log(ERR, "nuls address " .. addr .. " not found in rds")
     --request from nulscan.com
