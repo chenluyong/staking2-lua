@@ -30,8 +30,8 @@ local _M = {
      IOSTABC_GETACCOUNT = "https://www.iostabc.com/endpoint/getAccount/",
      IOSTABC_GETTOTALVOTE = "https://www.iostabc.com/api/vote/votes",
 
-     NULSCAN_GETACCOUNT = "https://nulscan.io/api/"
-
+     NULSCAN_GETACCOUNT = "https://nulscan.io/api/",
+     NULSCAN_DECIMAL = 100000000
 }
 
 
@@ -101,7 +101,7 @@ local DEBUG = false
 local t = io.popen("/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d 'addr:'")
 local a = t:read("*all")
 a = string.gsub(a, "^%s*(.-)%s*$", "%1")
-if a == "172.17.0.6" then
+if a == "172.17.0.4" then
     -- open dev
     DEBUG = true
 end
