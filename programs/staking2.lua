@@ -76,7 +76,9 @@ local function main()
         -- get cache
         local ret = rds_get(request_all_uri)
         if ret ~= nil and ret ~= ngx.null then
-            return cjson.decode(ret)
+            local ret_value = cjson.decode(ret)
+            ret_value.cache = true
+            return ret_value
         end
 
         -- call
@@ -119,9 +121,7 @@ local function main()
             if expire_time ~= 0 then
                 -- tpis: for now that's all.
                 --       after tactics cache,
-RET.cache = true
                 pcall(rds_set(ngx.var.request_uri, cjson.encode(RET), expire_time))
-RET.cache = false
             end
         end
     end
