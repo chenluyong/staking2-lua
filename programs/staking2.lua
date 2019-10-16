@@ -111,7 +111,7 @@ local function main()
             RET.code = 0
         end
         -- cache result
-        if not RET.error and not RET.warning and request_type and request_module and config.REDIS[request_type] then
+        if RET.code == 0 and not RET.error and not RET.warning and request_type and request_module and config.REDIS[request_type] then
             local expire_time = config.REDIS[request_type][request_module]
             if not expire_time then
                 expire_time = config.REDIS[request_type]['default']
@@ -119,6 +119,7 @@ local function main()
             if expire_time ~= 0 then
                 -- tpis: for now that's all.
                 --       after tactics cache,
+RET.cache = true
                 pcall(rds_set(ngx.var.request_uri, cjson.encode(RET), expire_time))
             end
         end

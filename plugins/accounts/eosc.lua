@@ -83,6 +83,7 @@ local function normalize(str)
 end
 
 function _M.main()
+_M.code = debug.getinfo(1).currentline
 --if true then return { aaa = "aaa"} end
     local addr = args.acc
     if not addr then
@@ -94,6 +95,7 @@ function _M.main()
         }
     end
 
+_M.code = debug.getinfo(1).currentline
     local res, err = httpc:post(config.EOSC_SEARCHACCOUNT, {
         headers = {['Content-Type'] = 'application/json;charset=UTF-8'},
         timout = 10,
@@ -109,6 +111,7 @@ function _M.main()
         RET.message = err
         return RET
     end
+_M.code = debug.getinfo(1).currentline
 
     local ret = cjson.decode(res)
     if ret.data and #ret.data == 0 then
@@ -122,6 +125,7 @@ function _M.main()
                 account_name = addr
             })
         })
+_M.code = debug.getinfo(1).currentline
         if not res then
             RET.status = 1
             RET.error = "can not access data"
@@ -134,6 +138,7 @@ function _M.main()
             RET.exist = false
             RET.error = string.format("account don't exist")
         else
+_M.code = debug.getinfo(1).currentline
             udata = cjson.decode(ret.data.origin_data)
             RET.exist = true
             RET.balance = normalize(udata.core_liquid_balance)
