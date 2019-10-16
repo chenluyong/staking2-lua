@@ -121,6 +121,7 @@ local function main()
                 --       after tactics cache,
 RET.cache = true
                 pcall(rds_set(ngx.var.request_uri, cjson.encode(RET), expire_time))
+RET.cache = false
             end
         end
     end
