@@ -13,9 +13,11 @@ local _M = {
      EOSC_NODESINFO = "https://w3.eosforce.cn/v1/chain/get_table_rows",
 
     --curl -H "Content-Type: application/json" -X POST -d '{"account_name":"bepal.eosc"}' 'https://explorer.eosforce.io/web/get_account_info' | jq
-     EOSC_SEARCHACCOUNT = "http://18.179.202.20:9990/web/search",
+--     EOSC_SEARCHACCOUNT = "http://18.179.202.20:9990/web/search",
+     EOSC_SEARCHACCOUNT = "https://explorer.eosforce.io/web/search",
 --ngx.say(config.EOSC_SEARCHACCOUNT)
-     EOSC_GETACCOUNT = "http://18.179.202.20:9990/web/get_account_info",
+--     EOSC_GETACCOUNT = "http://18.179.202.20:9990/web/get_account_info",
+     EOSC_GETACCOUNT = "https://explorer.eosforce.io/web/get_account_info",
 
     --http://vapor.blockmeta.com/api/v1/address/vp1qcj7dzpjlnsg7pf24nj6pduar9dc24uxe8ywc9
      BYSTACK_RPC = "http://127.0.0.1:9889/",
@@ -74,6 +76,7 @@ _M.REDIS = {
     default_time = 1200,
     accounts = {
         wanchain = 0, -- no cache, real-time
+        eosc = 0,
         default  = 60 -- default 20 minutes timeout
     },
     nodes = {
