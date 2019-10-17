@@ -16,6 +16,8 @@ return
 		    statement_en="拉票陈述宣言",
 		    location="中国",
 		    location_en="China",
+                    address = "node address",
+		    description="简介",
 		    pub_key="1bec3a35842 公钥",
 		    total_vote=2190129506200000, -- 总投票数量
 		    node_type="producer", -- 节点类型[生产者/见证者/其它]
