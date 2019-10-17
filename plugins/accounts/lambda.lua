@@ -73,7 +73,6 @@ _M.code = debug.getinfo(1).currentline
         return {status = 1, error = "request "..config.IOSTABC_GETACCOUNT.."failed", code = debug.getinfo(1).currentline}
     end
 
---    log(ERR, ">>response: ".. res.status .. " " .. res.body)
 
     if res.status ~= 200 then
         RET.exist = false
@@ -83,6 +82,15 @@ _M.code = debug.getinfo(1).currentline
     end
 
     local ret = cjson.decode(res.body)
+
+    if #ret.data.available == 0 then
+        RET.exist = false
+        RET.error = "account not exist."
+    else
+        RET.exist = true
+    end
+
+
 _M.code = debug.getinfo(1).currentline
     if ret then
         local voted = ret.data.delegated / 1000000
