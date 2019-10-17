@@ -33,6 +33,7 @@ function _M.main()
                 table.insert(RET.nodes, {
                     alias = inline_node.validator_stash,
                     alias_en = inline_node.validator_stash,
+                    address = inline_node.validator_stash,
                     total_vote = inline_node.bonded_total == ngx.null and 0 or inline_node.bonded_total,
                     rank = inline_node.rank_validator + 1,
                     voters = inline_node.count_nominators,
