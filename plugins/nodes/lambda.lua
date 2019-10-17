@@ -53,6 +53,7 @@ _M.code = debug.getinfo(1).currentline
                 table.insert(RET.nodes, {
                     alias = node.description_moniker,
                     alias_en = node.description_moniker,
+                    address = node.operator_address,
                     total_vote = tonumber(node.tokens) / 1000000,
                     website = node.description_website,
                     description = node.description_details,
