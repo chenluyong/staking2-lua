@@ -44,7 +44,7 @@ _M.code = debug.getinfo(1).currentline
         for _, node in pairs(ret.data.validatorList) do
             repeat
                 voters = nil
-                if false then
+                if true then
                     local res,err = httpc:get("https://explorer.lambdastorage.com/api/delegations/queryDelegationsForValidator?validator=" .. node.operator_address)
                     if res then
                         voters = cjson.decode(res).data.count
