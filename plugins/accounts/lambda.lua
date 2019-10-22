@@ -73,14 +73,6 @@ _M.code = debug.getinfo(1).currentline
         return {status = 1, error = "request "..config.IOSTABC_GETACCOUNT.."failed", code = debug.getinfo(1).currentline}
     end
 
-
-    if res.status ~= 200 then
-        RET.exist = false
-        RET.error = "account not exist."
-    else
-        RET.exist = true
-    end
-
     local ret = cjson.decode(res.body)
 
     if #ret.data.available == 0 then
