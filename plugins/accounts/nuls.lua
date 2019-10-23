@@ -204,7 +204,7 @@ _M.code = debug.getinfo(1).currentline
     if ret and ret.error then
         if not validate_address(addr) then
             RET.exist = false
-            RET.error = ret.error.message
+            RET.warning = "internal error: "ret.error.message
         else
             --the address is validated, but no tx on chain yet.
             RET.exist = false
