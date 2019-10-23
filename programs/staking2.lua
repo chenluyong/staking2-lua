@@ -89,7 +89,9 @@ local function main()
         end
         )
         RET.code = lua.code
-
+        if RET.code ~= 0 then
+            RET.error = "unknown error."
+        end
         return ret_table
     end
     )
