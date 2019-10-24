@@ -13,7 +13,8 @@ local RET = {}
 
 function _M.main()
 --local detail = {}
-    local res, err = httpc:get("https://polkascan.io/kusama/api/v1/session/validator?&filter[latestSession]=true&page[size]=25")
+_M.code = debug.getinfo(1).currentline 
+    local res, err = httpc:get("https://polkascan.io/kusama-cc2/api/v1/session/validator?filter%5BlatestSession%5D=true&page%5Bsize%5D=25")
     local ok = string.find(res,"<html>")
 
     if not res or ok then
@@ -43,7 +44,7 @@ function _M.main()
             until true
         end
     end
-
+_M.code = 0
 --    RET = convert(RET)
 --RET.detail = detail
     return RET
