@@ -11,8 +11,10 @@ local RET = {}
 local function get_bonded_tokens()
     local res, err = httpc:get("https://api.cosmostation.io/v1/status")
 
+_M.code = debug.getinfo(1).currentline
     if not res then
         RET.warning = "request bonded tokens failed."
+        return 0
     end
     local ret = cjson.decode(res)
     if ret then
@@ -25,9 +27,14 @@ end
 local function get_validator_votes(_account)
     local res, err = httpc:get("https://api.cosmostation.io/v1/staking/validator/delegations/".._account)
 
+_M.code = debug.getinfo(1).currentline
+
     if not res then
         RET.warning = "request validator votes failed."
+        return 0
     end
+
+_M.code = debug.getinfo(1).currentline
 
     local ret = cjson.decode(res)
     if ret then
@@ -61,6 +68,11 @@ _M.code = debug.getinfo(1).currentline
             local vote_percent = bonded_tokens == 0 and ngx.null or (node.tokens / bonded_tokens / 1000000)
             local vote_percent_str = string.format("%.4e", vote_percent)
             local temp_pos = string.find(vote_percent_str,"e") - 1
+            local voters = 0
+            local tokens = tonumber(node.tokens)
+            if tokens > 1000000000 and node.rank < 10 then
+                voters = get_validator_votes(node.operator_address)
+            end
             table.insert(RET.nodes, {
                     alias = node.moniker,
                     alias_en = node.moniker,
@@ -68,11 +80,11 @@ _M.code = debug.getinfo(1).currentline
                     pub_key = node.consensus_pubkey,
                     description = node.details,
                     description_en = node.details,
-                    total_vote = node.tokens / 1000000,
+                    total_vote = tokens / 1000000,
                     rank = node.rank,
                     node_type = node.jailed == true and "validator" or (node.rank < 101 and "producer" or "validator"),
                     vote_percent = string.sub(vote_percent_str, 1, temp_pos),
---                    voters = get_validator_votes(),
+                    voters = voters,
                     commission_fee = string.format("%.2f",tonumber(node.rate) * 100)
                 })
         end
