@@ -70,7 +70,7 @@ _M.code = debug.getinfo(1).currentline
             local temp_pos = string.find(vote_percent_str,"e") - 1
             local voters = 0
             local tokens = tonumber(node.tokens)
-            if tokens > 1000000000 and node.rank < 10 then
+            if tokens > 1000000000 and node.rank < 10 and false then
                 voters = get_validator_votes(node.operator_address)
             end
             table.insert(RET.nodes, {
@@ -84,7 +84,7 @@ _M.code = debug.getinfo(1).currentline
                     rank = node.rank,
                     node_type = node.jailed == true and "validator" or (node.rank < 101 and "producer" or "validator"),
                     vote_percent = string.sub(vote_percent_str, 1, temp_pos),
-                    voters = voters,
+--                    voters = voters,
                     commission_fee = string.format("%.2f",tonumber(node.rate) * 100)
                 })
         end
