@@ -84,13 +84,13 @@ local function main()
         -- call
         local lua = require(path)
         local ret_table = {}
-        pcall(function()
+        local ok, err = pcall(function()
             ret_table = lua.main() 
         end
         )
         RET.code = lua.code
         if RET.code ~= 0 and RET.code ~= nil then
-            RET.error = "unknown error."
+            RET.error =  err 
         end
         return ret_table
     end
