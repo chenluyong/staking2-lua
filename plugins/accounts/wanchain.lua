@@ -85,6 +85,7 @@ end
 
 
 function _M.main()
+_M.code = debug.getinfo(1).currentline
     local args = ngx.req.get_uri_args()
     if not args.acc then
         return {
@@ -92,7 +93,9 @@ function _M.main()
             code = debug.getinfo(1).currentline
         }
     end
-    return get_account(string.lower(args.acc))
+    local ret = get_account(string.lower(args.acc))
+_M.code = 0
+    return ret
 end
 
 return _M
