@@ -79,8 +79,8 @@ _M.REDIS = {
         default  = 20 * 60 -- default 20 minutes timeout
     },
     nodes = {
-        vapor = 86400, -- one day
-        bystack = 86400,
+--        vapor = 86400, -- one day
+--        bystack = 86400,
         wanchain = 600,
         iost = 3600,
         default = 86400
