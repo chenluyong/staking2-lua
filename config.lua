@@ -62,7 +62,6 @@ _M.CHAINX_ACCOUNT_PY = _M.ROOT_PATH .. "/libraries/scripts/chainx.py"
 _M.IOST_NODESINFO = "https://www.iostabc.com/api/producers"
 
 _M.WANCHAIN_RPC = "http://47.99.50.243:80"
-_M.WANCHAIN_NODESINFO = "http://47.99.50.243:80/nodes/wanchain"
 
 -- https://api.bystack.com/supernode/v1/sn-table
 _M.BYSTACK_NODESINFO = "https://api.bystack.com/supernode/v1/sn-table"
