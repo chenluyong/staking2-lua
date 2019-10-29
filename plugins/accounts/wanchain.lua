@@ -3,8 +3,10 @@ local _M = {}
 local cjson = require "cjson"
 local config = require "config"
 
+local RET = {}
+
 local function gwan_rpc(_method, _params)
-   
+_M.code = debug.getinfo(1).currentline   
     local http = require 'resty.http'
     local httpc = http.new()
 
@@ -23,25 +25,42 @@ local function gwan_rpc(_method, _params)
 end
 
 local function get_balance(_addr)
+_M.code = debug.getinfo(1).currentline
     local res = gwan_rpc("eth_getBalance",{_addr,"latest"})
-
     if not res then
         log(ERR, "request"..WANCHAIN_RPC.."failed")
         return 0
     end
-    return tonumber(cjson.decode(res.body).result)
+    local ret = tonumber(cjson.decode(res.body).result)
+--ngx.say(res.body)
+    return ret
 end
 
 local function get_account_stake(_addr)
+_M.code = debug.getinfo(1).currentline
+--    local http = require 'resty.http'
+--    local httpc = http.new()
+--    local res, err = httpc:request_uri(config.WANCHAIN_NODESINFO, {
+--        method = "GET",
+--        headers = config.CAMO_UA
+--    })
+--    if err or not res then
+--        return 0
+--    end
 
-    local http = require 'resty.http'
-    local httpc = http.new()
-    local res, _ = httpc:request_uri(config.WANCHAIN_NODESINFO, {
-        method = "GET",
-        headers = config.CAMO_UA
-    })
---    local res = ngx.location.capture('/nodes/wanchain')
---ngx.say(type(cjson.decode(res.body)))
+
+    -- get rpc
+    local res = gwan_rpc("eth_blockNumber",{})
+
+    if not res then
+--        log(ERR, "request"..WANCHAIN_RPC.."failed")
+        return nil
+    end
+    --ngx.say(res.body)
+    block_number = tonumber(cjson.decode(res.body).result)
+    res = gwan_rpc("pos_getStakerInfo",{block_number})
+    
+
     response = cjson.decode(res.body).result
     total_stake = 0
 
@@ -68,17 +87,22 @@ end
 local function get_account(_addr)
     local iBalance = get_balance(_addr) / 1000000000000000000
     local locking = get_account_stake(_addr) / 1000000000000000000
-
+--    local locking = 0
+--ngx.say(locking)
+--    if not ok then
+--        locking = err / 1000000000000000000
+--    end
+_M.code = debug.getinfo(1).currentline
     local isPledged = false
     if locking > 0 then
         isPledged = true
     end
     return { 
-        balance = iBalance,
+        balance = iBalance + locking,
         balanceTotal = iBalance + locking,
         exist = true,
         pledged = isPledged,
-        balanceUsable = iBalance + locking,
+        balanceUsable = iBalance,
         balanceLocking = locking
     }
 end
