@@ -48,7 +48,7 @@ end
 
 --
 local MAJOR_VERSION = 1
-local MINOR_VERSION = 1
+local MINOR_VERSION = 1 
 local PATCH_VERSION = _M.git_commit_count()
 _M.VERSION = MAJOR_VERSION .. "." .. MINOR_VERSION .. "." .. PATCH_VERSION
 
@@ -74,9 +74,9 @@ _M.REDIS = {
     timeout = 1000,
     default_time = 1200,
     accounts = {
-        wanchain = 0, -- no cache, real-time
-        eosc = 0,
-        default  = 60 -- default 20 minutes timeout
+        wanchain = 60, 
+        eosc = 60,
+        default  = 20 * 60 -- default 20 minutes timeout
     },
     nodes = {
         vapor = 86400, -- one day
