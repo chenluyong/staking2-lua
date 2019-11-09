@@ -95,7 +95,7 @@ RET.code = 1
         return ret_table
     end
     )
-
+    pcall(function()
     -- alias
     local ret_table = err 
 
@@ -130,6 +130,7 @@ RET.code = 1
 
     -- put it into the connection poll
     rds:set_keepalive(10000,100)
+    end)
 end
 
 main()

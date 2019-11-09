@@ -111,7 +111,6 @@ RET.code = debug.getinfo(1).currentline
         return {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
     end
 
-    log(ERR, "1111111bystack address " .. addr .. " not found in rds")
     local res, err = httpc:request_uri(config.BYSTACK_GETACCOUNT..addr, {
         method = "GET",
         headers = config.CAMO_UA,
@@ -120,15 +119,6 @@ RET.code = debug.getinfo(1).currentline
     if not res then
         return {error = "request "..config.BYSTACK_GETACCOUNT.."failed", code = debug.getinfo(1).currentline }
     end
-
-    log(ERR, ">>response: ".. res.status .. " " .. res.body)
-
-    --if res.status ~= 200 then
-        --RET.exist = false
-        --RET.error = "account not exist."
-    --else
-        --RET.exist = true
-    --end
 
     local ret = cjson.decode(res.body)
     if ret and ret.code and ret.code == 10002 then
