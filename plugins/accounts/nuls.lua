@@ -60,7 +60,7 @@ _M.code = debug.getinfo(1).currentline
 
 _M.code = debug.getinfo(1).currentline
     if not res then
-        return {status = 1, error = "request "..req_uri.."failed", code = debug.getinfo(1).currentline}
+        return 0
     end
 
     local ret = cjson.decode(res.body)
@@ -70,6 +70,10 @@ _M.code = debug.getinfo(1).currentline
 
 log(ERR, ">>response: ".. res.status .. " " .. res.body)
     if ret then
+_M.code = debug.getinfo(1).currentline
+        if ret.error then
+            return 0 
+        end
         local amount_24_hour = 0
         for _,action in pairs(ret.result.list) do
             local timestamp = action.createTime;
@@ -204,7 +208,9 @@ _M.code = debug.getinfo(1).currentline
     if ret and ret.error then
         if not validate_address(addr) then
             RET.exist = false
-            RET.warning = "internal error: "..ret.error.message
+            RET.error = "internal error: "..ret.error.message
+_M.code = debug.getinfo(1).currentline 
+            return RET
         else
             --the address is validated, but no tx on chain yet.
             RET.exist = false

@@ -15,7 +15,8 @@ local function get_24_hour(account)
         headers = config.CAMO_UA
     })
     if not res then
-        return {status = 1, error = "request "..req_uri.."failed", code = debug.getinfo(1).currentline}
+RET.warning = "request ".. req_uri .. "error"
+        return 0
     end
      
     local ret = cjson.decode(res.body)
@@ -44,10 +45,12 @@ end
 
 
 function _M.main()
+RET.code = debug.getinfo(1).currentline
     local args = ngx.req.get_uri_args()
     local acc = args.acc
     if not acc then
         log(ERR, "ERR not iost account provided.")
+RET.code = debug.getinfo(1).currentline
         return {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
     end
 
@@ -62,6 +65,7 @@ function _M.main()
     })
 
     if not res then
+RET.code = debug.getinfo(1).currentline
         return {status = 1, error = "request "..config.IOSTABC_GETACCOUNT.."failed", code = debug.getinfo(1).currentline}
     end
 
@@ -70,10 +74,13 @@ function _M.main()
     if res.status ~= 200 then
         RET.exist = false
         RET.error = "account not exist."
+RET.code = debug.getinfo(1).currentline
+        return RET
     else
         RET.exist = true
     end
 
+RET.code = debug.getinfo(1).currentline
     local ret = cjson.decode(res.body)
     if ret and ret.name then
         local voted = 0
@@ -104,6 +111,7 @@ function _M.main()
     end
     RET.recentFunding = get_24_hour(acc)
     RET.status = 0
+RET.code = 0
     return RET
 end
 
