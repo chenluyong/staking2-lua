@@ -4,7 +4,8 @@ local bit = require("bit")
 local http = require "resty.http"
 local httpc = http.new()
 local config = require("config")
-
+local log = ngx.log
+local ERR = ngx.ERR
 local _M = {}
 
 local RET = {}
@@ -21,7 +22,8 @@ local function get_24_hour(account)
         headers = config.CAMO_UA
     })
     if not res then
-        return {status = 1, error = "request "..req_uri.."failed", code = debug.getinfo(1).currentline}
+        RET.warning = "request "..req_uri.."failed"
+        return 0
     end
 
     local ret = cjson.decode(res.body)
@@ -100,7 +102,7 @@ function validate_address(addr)
 end
 
 function _M.main()
-
+RET.code = debug.getinfo(1).currentline
     local args = ngx.req.get_uri_args()
     local addr = args.acc
     if not addr then
@@ -109,7 +111,7 @@ function _M.main()
         return {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
     end
 
---    log(ERR, "bystack address " .. addr .. " not found in rds")
+    log(ERR, "1111111bystack address " .. addr .. " not found in rds")
     local res, err = httpc:request_uri(config.BYSTACK_GETACCOUNT..addr, {
         method = "GET",
         headers = config.CAMO_UA,
@@ -119,7 +121,7 @@ function _M.main()
         return {error = "request "..config.BYSTACK_GETACCOUNT.."failed", code = debug.getinfo(1).currentline }
     end
 
-    --log(ERR, ">>response: ".. res.status .. " " .. res.body)
+    log(ERR, ">>response: ".. res.status .. " " .. res.body)
 
     --if res.status ~= 200 then
         --RET.exist = false
@@ -130,18 +132,12 @@ function _M.main()
 
     local ret = cjson.decode(res.body)
     if ret and ret.code and ret.code == 10002 then
-        if not validate_address(addr) then
+--        if not validate_address(addr) then
             RET.exist = false
-            RET.error = "account don't exist"
-        else
-            --the address is validated, but no tx on chain yet.
-            RET.exist = true
-            RET.balance = 0
-            RET.balanceTotal = 0
-            RET.balanceLocking = 0
-            RET.balanceUsable = 0
-            RET.pledged = false
-        end
+            RET.error = "account don't exist."
+RET.code = debug.getinfo(1).currentline
+            return RET
+--        end
     else
         RET.balance = ret.data.address[1].balance / 100000000
         RET.balanceTotal = ret.data.address[1].balance / 100000000
@@ -185,6 +181,7 @@ function _M.main()
     end
     RET.recentFunding = get_24_hour(addr)
     RET.status = 0
+RET.code = 0
     return RET
 end
 

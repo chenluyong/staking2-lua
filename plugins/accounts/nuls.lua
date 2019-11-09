@@ -208,7 +208,7 @@ _M.code = debug.getinfo(1).currentline
     if ret and ret.error then
         if not validate_address(addr) then
             RET.exist = false
-            RET.error = "internal error: "..ret.error.message
+            RET.error = "address error: "..ret.error.message
 _M.code = debug.getinfo(1).currentline 
             return RET
         else

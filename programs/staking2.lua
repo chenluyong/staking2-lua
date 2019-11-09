@@ -60,7 +60,7 @@ string.split = function(s, p)
 end
 
 local function main()
-
+RET.code = 1
     -- get request uri
     local request_all_uri = ngx.var.request_uri
     local request_uri = ngx.var.uri
