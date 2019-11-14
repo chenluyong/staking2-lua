@@ -109,9 +109,11 @@ _M.position = debug.getinfo(1).currentline
 end
 
 function _M.main()
-    ret = _M.main_btm()
+_M.code = debug.getinfo(0).currentline
+RET = {}
+    RET = _M.main_btm()
 _M.code = 0
-    return ret
+    return RET
 end
 
 
