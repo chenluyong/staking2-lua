@@ -45,12 +45,12 @@ end
 
 
 function _M.main()
-RET.code = debug.getinfo(1).currentline
+_M.code = debug.getinfo(1).currentline
     local args = ngx.req.get_uri_args()
     local acc = args.acc
     if not acc then
         log(ERR, "ERR not iost account provided.")
-RET.code = debug.getinfo(1).currentline
+_M.code = debug.getinfo(1).currentline
         return {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
     end
 
@@ -65,7 +65,7 @@ RET.code = debug.getinfo(1).currentline
     })
 
     if not res then
-RET.code = debug.getinfo(1).currentline
+_M.code = debug.getinfo(1).currentline
         return {status = 1, error = "request "..config.IOSTABC_GETACCOUNT.."failed", code = debug.getinfo(1).currentline}
     end
 
@@ -74,13 +74,14 @@ RET.code = debug.getinfo(1).currentline
     if res.status ~= 200 then
         RET.exist = false
         RET.error = "account not exist."
-RET.code = debug.getinfo(1).currentline
+
+_M.code = debug.getinfo(1).currentline
         return RET
     else
         RET.exist = true
     end
 
-RET.code = debug.getinfo(1).currentline
+_M.code = debug.getinfo(1).currentline
     local ret = cjson.decode(res.body)
     if ret and ret.name then
         local voted = 0
@@ -111,7 +112,7 @@ RET.code = debug.getinfo(1).currentline
     end
     RET.recentFunding = get_24_hour(acc)
     RET.status = 0
-RET.code = 0
+_M.code = 0
     return RET
 end
 

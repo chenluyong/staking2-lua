@@ -11,6 +11,7 @@ local _M = {}
 local RET = {}
 local ADDRESS_LENGTH = 42
 
+_M.code = debug.getinfo(1).currentline
 
 local function get_24_hour(account)
     http = require "resty.http"
@@ -102,12 +103,10 @@ function validate_address(addr)
 end
 
 function _M.main()
-RET.code = debug.getinfo(1).currentline
+_M.code = debug.getinfo(1).currentline
     local args = ngx.req.get_uri_args()
     local addr = args.acc
     if not addr then
-    --    log(ERR, "ERR not bystack address provided.")
-    --    ngx.say(cjson.encode({status = 1, error = "missing arguments"}))
         return {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
     end
 
@@ -125,7 +124,7 @@ RET.code = debug.getinfo(1).currentline
 --        if not validate_address(addr) then
             RET.exist = false
             RET.error = "account don't exist."
-RET.code = debug.getinfo(1).currentline
+_M.code = debug.getinfo(1).currentline
             return RET
 --        end
     else
@@ -171,7 +170,7 @@ RET.code = debug.getinfo(1).currentline
     end
     RET.recentFunding = get_24_hour(addr)
     RET.status = 0
-RET.code = 0
+_M.code = 0
     return RET
 end
 
