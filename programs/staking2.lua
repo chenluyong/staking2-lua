@@ -6,6 +6,9 @@ local RET = {}
 local rds = redis:new()
 rds:set_timeout(config.REDIS.timeout)
 
+log = ngx.log
+ERR = ngx.ERR
+
 function rds_connect()
     rds:set_keepalive(10000,100)
     local ok, err = rds:connect(config.REDIS.ip, config.REDIS.port)
@@ -95,7 +98,7 @@ RET.code = 1
         return ret_table
     end
     )
-    pcall(function()
+    local ok, err = pcall(function()
     -- alias
     local ret_table = err 
 
@@ -113,7 +116,9 @@ RET.code = 1
 
         if not RET.code and not RET.error then
             RET.code = 0
+            RET.debug = 0
         end
+
         -- cache result
         if RET.code == 0 and not RET.error and not RET.warning and request_type and request_module and config.REDIS[request_type] then
             local expire_time = config.REDIS[request_type][request_module]
@@ -131,6 +136,10 @@ RET.code = 1
     -- put it into the connection poll
     rds:set_keepalive(10000,100)
     end)
+    if not ok then
+        RET.code = debug.getinfo(1).currentline
+        RET.error = "internal error:" .. err
+    end
 end
 
 main()
