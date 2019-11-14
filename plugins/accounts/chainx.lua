@@ -90,7 +90,8 @@ end
 
 
 function _M.main()
-    
+RET = {}
+_M.code = debug.getinfo(0).currentline    
     local ret = {}
     local acc = ngx.req.get_uri_args().acc
     if not acc then

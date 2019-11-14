@@ -148,6 +148,7 @@ end
 
 
 function _M.main()
+RET = {}
 _M.code = debug.getinfo(1).currentline 
 --    if true then return {a="a"} end
     local args = ngx.req.get_uri_args()

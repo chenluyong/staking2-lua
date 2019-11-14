@@ -41,6 +41,7 @@ function validate_address(_addr)
 end
 
 function _M.main()
+RET = {}
 _M.code = debug.getinfo(1).currentline
 
     local args = ngx.req.get_uri_args()

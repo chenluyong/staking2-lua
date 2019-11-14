@@ -44,9 +44,9 @@ RET.warning = "request ".. req_uri .. "error"
     end
 end
 
-
 function _M.main()
 _M.code = debug.getinfo(1).currentline
+RET = {}
     local args = ngx.req.get_uri_args()
     local acc = args.acc
     if not acc then
@@ -74,8 +74,8 @@ _M.code = debug.getinfo(1).currentline
     if res.status ~= 200 then
         RET.exist = false
         RET.error = "account not exist."
-        log(ERR, ">>response: ".. res.status .. " " .. res.body)
-
+        log(ERR, ">> response: ".. res.status .. " " .. res.body)
+        log(ERR, ">> response: ".. cjson.encode(RET))
 _M.code = debug.getinfo(1).currentline
         return RET
     else

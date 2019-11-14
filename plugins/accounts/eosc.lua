@@ -84,6 +84,7 @@ end
 
 function _M.main()
 _M.code = debug.getinfo(1).currentline
+RET = {}
 --if true then return { aaa = "aaa"} end
     local addr = args.acc
     if not addr then
