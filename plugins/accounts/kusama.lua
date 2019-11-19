@@ -111,7 +111,6 @@ _M.code = debug.getinfo(1).currentline
                     node = {short_address = "", alias = ""}
                     if true then
                         local res, err = ihttpc:get("http://47.96.84.173:8088/getNickName/"..obj.value)
-                        node.alias = res
                         local result_obj = cjson.decode(res)
                         if result_obj.statusCode == 200 then
                             node.alias = str2hex(string.sub(result_obj.object,3))
