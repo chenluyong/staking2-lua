@@ -62,7 +62,7 @@ _M.code = debug.getinfo(1).currentline
     end
     local free_balance = ret.object
     local lock_balance = 0
-    if false then
+    if true then
         local request_url = "http://47.96.84.173:8088/getLockBalance/" .. addr
         local res, err = httpc:request_uri(request_url, {
             method = "GET",
@@ -77,9 +77,19 @@ _M.code = debug.getinfo(1).currentline
         if ret.statusCode ~= 200 then
             return {status = 1, exist = false, error = ret.object, code = debug.getinfo(1).currentline}
         end
-        lock_balance = ret.object
+        lock_balance_obj = cjson.decode(ret.object)
+        for _, lock_item in pairs(lock_balance_obj) do
+            if type(lock_item.amount) == "number" then
+                lock_balance = lock_balance + lock_item.amount 
+            else
+                local hex_lock_balance = string.sub(lock_item.amount,3)
+                lock_balance = lock_balance + tonumber(hex_lock_balance)
+            end
+        end
+--RET.lock = lock_balance_obj
         -- temporarily not implemented
-        lock_balance = 0
+        
+--        lock_balance = 0
     end
 
 
@@ -87,11 +97,14 @@ _M.code = debug.getinfo(1).currentline
     if ret and ret.error then
     else
 _M.code = debug.getinfo(1).currentline
-        RET.balance = (free_balance + lock_balance) / 1000000000000 
-        RET.balanceTotal = (free_balance + lock_balance) / 1000000000000
+        RET.balance = (free_balance) / 1000000000000 
+        RET.balanceTotal = (free_balance) / 1000000000000
         RET.balanceLocking = lock_balance / 1000000000000
         RET.balanceUsable = free_balance / 1000000000000
-        RET.pledged = false 
+        RET.pledged = false
+        if lock_balance ~= 0 then
+            RET.pledged = true
+        end 
     end
 
     if true then
