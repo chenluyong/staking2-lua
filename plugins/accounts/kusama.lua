@@ -45,23 +45,41 @@ RET = {}
     if not addr then
         return  {status = 1, error = "missing arguments", code = debug.getinfo(1).currentline}
     end
-
-    local request_url = "http://47.96.84.173:8088/getFreeBalance/" .. addr
-    local res, err = httpc:request_uri(request_url, {
-        method = "GET",
-        headers = config.CAMO_UA 
-    })
-    if not res then
-        return  {status = 1, error = "internal error.", code = debug.getinfo(1).currentline}
+    local reserved_balance = 0
+    local short_address = ""
+    local vote_balance = 0
+    local free_balance = 0
+    local lock_balance = 0
+    if true then
+        local res, err = ihttpc:get(string.format("https://polkascan.io/kusama-cc2/api/v1/account/%s?include=indices",addr))
+        local result_obj = cjson.decode(res)
+        if not res then
+            RET.error = "request account/include=indices  error."
+        end
+        if #result_obj.included ~= 0 then
+            short_address = result_obj.included[1].id
+        end
+        reserved_balance = result_obj.data.attributes.reserved_balance
     end
+    
+    if true then 
+        local request_url = "http://47.96.84.173:8088/getFreeBalance/" .. addr
+        local res, err = httpc:request_uri(request_url, {
+            method = "GET",
+            headers = config.CAMO_UA 
+        })
+        if not res then
+            return  {status = 1, error = "internal error.", code = debug.getinfo(1).currentline}
+        end
 
 _M.code = debug.getinfo(1).currentline
-    local ret = cjson.decode(res.body)
-    if ret.statusCode ~= 200 then
-        return {status = 1, exist = false, error = ret.object, code = debug.getinfo(1).currentline}
+        local ret = cjson.decode(res.body)
+        if ret.statusCode ~= 200 then
+            return {status = 1, exist = false, error = ret.object, code = debug.getinfo(1).currentline}
+        end
+        free_balance = ret.object
     end
-    local free_balance = ret.object
-    local lock_balance = 0
+
     if true then
         local request_url = "http://47.96.84.173:8088/getLockBalance/" .. addr
         local res, err = httpc:request_uri(request_url, {
@@ -77,20 +95,29 @@ _M.code = debug.getinfo(1).currentline
         if ret.statusCode ~= 200 then
             return {status = 1, exist = false, error = ret.object, code = debug.getinfo(1).currentline}
         end
-        lock_balance_obj = cjson.decode(ret.object)
+        local lock_balance_obj = cjson.decode(ret.object)
         for _, lock_item in pairs(lock_balance_obj) do
-            if type(lock_item.amount) == "number" then
-                lock_balance = lock_balance + lock_item.amount 
-            else
-                local hex_lock_balance = string.sub(lock_item.amount,3)
-                lock_balance = lock_balance + tonumber(hex_lock_balance)
+            if lock_item.id == "0x7374616b696e6720" then
+                if type(lock_item.amount) == "number" then
+                    lock_balance = lock_balance + lock_item.amount
+                else
+                    local hex_lock_balance = string.sub(lock_item.amount,3)
+                    lock_balance = lock_balance + tonumber(hex_lock_balance, 16)
+                end
+            elseif lock_item.id == "0x706872656c656374" then
+                if type(lock_item.amount) == "number" then
+                    vote_balance = vote_balance + lock_item.amount
+                else
+                    local hex_vote_balance = string.sub(lock_item.amount,3)
+                    vote_balance = vote_balance + tonumber(hex_lock_balance)
+                end
             end
         end
+    end
 --RET.lock = lock_balance_obj
         -- temporarily not implemented
         
 --        lock_balance = 0
-    end
 
 
 _M.code = debug.getinfo(1).currentline
@@ -108,7 +135,7 @@ _M.code = debug.getinfo(1).currentline
     end
 
     if true then
-        local res, err = httpc:request_uri(string.format("https://polkascan.io/kusama-cc2/api/v1/extrinsic?&filter[address]=%s&page[size]=25",addr), {
+        local res, err = httpc:request_uri(string.format("https://polkascan.io/kusama-cc2/api/v1/extrinsic?&filter[address]=%s&page[size]=100",addr), {
             method = "GET",
             headers = config.CAMO_UA
         })
@@ -144,12 +171,23 @@ _M.code = debug.getinfo(1).currentline
                     node.address = obj.value
                     table.insert(RET.nominated, node)
                 end
+--            elseif item.attributes.call_id == "bond" or item.attributes.call_id == "bond_extra" then
+--                RET.bond_txs = {}
+--                table.insert(RET.bond_txs, item)
             end
         end
---        RET.transfer = ret
     end
 
     RET.recentFunding = 0--get_24_hour(addr)
+    RET.shortAddress = short_address
+    if not reserved_balance or reserved_balance ==ngx.null then
+        reserved_balance = 0
+    end
+    if not vote_balance or vote_balance ==ngx.null then
+        vote_balance = 0
+    end
+    RET.reservedBalance = reserved_balance / 1000000000000
+    RET.voteBalance = vote_balance / 1000000000000
     RET.status = 0
 _M.code = 0
     return RET
