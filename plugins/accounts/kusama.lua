@@ -135,7 +135,7 @@ _M.code = debug.getinfo(1).currentline
     end
 
     if true then
-        local res, err = httpc:request_uri(string.format("https://polkascan.io/kusama-cc2/api/v1/extrinsic?&filter[address]=%s&page[size]=100",addr), {
+        local res, err = httpc:request_uri(string.format("https://polkascan.io/kusama-cc2/api/v1/extrinsic?&filter[address]=%s&page[size]=25",addr), {
             method = "GET",
             headers = config.CAMO_UA
         })
@@ -171,9 +171,9 @@ _M.code = debug.getinfo(1).currentline
                     node.address = obj.value
                     table.insert(RET.nominated, node)
                 end
---            elseif item.attributes.call_id == "bond" or item.attributes.call_id == "bond_extra" then
---                RET.bond_txs = {}
---                table.insert(RET.bond_txs, item)
+            elseif item.attributes.call_id == "bond" or item.attributes.call_id == "bond_extra" then
+                RET.bond_txs = {}
+                table.insert(RET.bond_txs, item)
             end
         end
     end
