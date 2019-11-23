@@ -80,6 +80,8 @@ _M.code = debug.getinfo(1).currentline
                     session = inline_node.validator_session,
                     short_address = inline_node.short_address,
                     total_vote = inline_node.bonded_total == ngx.null and 0 or (inline_node.bonded_total / 1000000000000),
+                    own_vote = inline_node.bonded_own == ngx.null and 0 or (inline_node.bonded_own / 1000000000000),
+                    nominators_vote = inline_node.bonded_nominators == ngx.null and 0 or (inline_node.bonded_nominators / 1000000000000),
                     rank = inline_node.rank_validator + 1,
                     voters = inline_node.count_nominators,
                     commission = inline_node.commission == ngx.null and 0 or (inline_node.commission / 1000000000000),
