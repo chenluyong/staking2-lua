@@ -145,31 +145,33 @@ _M.code = debug.getinfo(1).currentline
         local ret = cjson.decode(res.body)
         for _, item in pairs(ret.data) do
             if item.attributes.call_id == "nominate" then
-                local param = item.attributes.params[1]
-                RET.nominated = {}
-                for _, obj in pairs(param.value) do
-                    node = {short_address = "", alias = ""}
-                    if true then
-                        local res, err = ihttpc:get("http://47.96.84.173:8088/getNickName/"..obj.value)
-                        local result_obj = cjson.decode(res)
-                        if result_obj.statusCode == 200 then
-                            node.alias = str2hex(string.sub(result_obj.object,3))
+                if RET.nominated == nil then
+                    local param = item.attributes.params[1]
+                    RET.nominated = {}
+                    for _, obj in pairs(param.value) do
+                        node = {short_address = "", alias = ""}
+                        if true then
+                            local res, err = ihttpc:get("http://47.96.84.173:8088/getNickName/"..obj.value)
+                            local result_obj = cjson.decode(res)
+                            if result_obj.statusCode == 200 then
+                                node.alias = str2hex(string.sub(result_obj.object,3))
+                            end
                         end
+                        if true then 
+                            local res, err = ihttpc:get(string.format("https://polkascan.io/kusama-cc2/api/v1/account/%s?include=indices",obj.value))
+                            local result_obj = cjson.decode(res)
+                            if not res then
+                                RET.warning = "request ".. obj.value .. " error."
+                            end
+                            if #result_obj.included ~= 0 then
+                                node.short_address = result_obj.included[1].id
+                            else
+                                node.short_address = ""
+                            end
+                        end
+                        node.address = obj.value
+                        table.insert(RET.nominated, node)
                     end
-                    if true then 
-                        local res, err = ihttpc:get(string.format("https://polkascan.io/kusama-cc2/api/v1/account/%s?include=indices",obj.value))
-                        local result_obj = cjson.decode(res)
-                        if not res then
-                            RET.warning = "request ".. obj.value .. " error."
-                        end
-                        if #result_obj.included ~= 0 then
-                            node.short_address = result_obj.included[1].id
-                        else
-                            node.short_address = ""
-                        end
-                    end
-                    node.address = obj.value
-                    table.insert(RET.nominated, node)
                 end
             elseif item.attributes.call_id == "bond" or item.attributes.call_id == "bond_extra" then
                 RET.bond_txs = {}
