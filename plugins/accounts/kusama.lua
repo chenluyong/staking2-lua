@@ -35,6 +35,54 @@ function str2hex(str)
 	return ret
 end
 
+function get_txs(addr)
+    if true then
+        local res, err = httpc:request_uri(string.format("https://polkascan.io/kusama-cc2/api/v1/extrinsic?&filter[address]=%s&page[size]=25",addr), {
+            method = "GET",
+            headers = config.CAMO_UA
+        })
+        if not res then
+            RET.warning = "internal error: request nominated and bond_txs failed."
+        else
+            local ret = cjson.decode(res.body)
+            for _, item in pairs(ret.data) do
+                if item.attributes.call_id == "nominate" then
+                    if RET.nominated == nil then
+                        local param = item.attributes.params[1]
+                        RET.nominated = {}
+                        for _, obj in pairs(param.value) do
+                            node = {short_address = "", alias = ""}
+                            if true then
+                                local res, err = ihttpc:get("http://47.96.84.173:8088/getNickName/"..obj.value)
+                                local result_obj = cjson.decode(res)
+                                if result_obj.statusCode == 200 then
+                                    node.alias = str2hex(string.sub(result_obj.object,3))
+                                end
+                            end
+                            if true then
+                                local res, err = ihttpc:get(string.format("https://polkascan.io/kusama-cc2/api/v1/account/%s?include=indices",obj.value))
+                                local result_obj = cjson.decode(res)
+                                if not res then
+                                    RET.warning = "request ".. obj.value .. " error."
+                                end
+                                if #result_obj.included ~= 0 then
+                                    node.short_address = result_obj.included[1].id
+                                else
+                                    node.short_address = ""
+                                end
+                            end
+                            node.address = obj.value
+                            table.insert(RET.nominated, node)
+                        end
+                    end
+               elseif item.attributes.call_id == "bond" or item.attributes.call_id == "bond_extra" then
+                    RET.bond_txs = {}
+                    table.insert(RET.bond_txs, item)
+               end
+            end
+        end
+    end
+end
 
 function _M.main()
 _M.code = debug.getinfo(1).currentline 
@@ -114,12 +162,6 @@ _M.code = debug.getinfo(1).currentline
             end
         end
     end
---RET.lock = lock_balance_obj
-        -- temporarily not implemented
-        
---        lock_balance = 0
-
-
 _M.code = debug.getinfo(1).currentline
     if ret and ret.error then
     else
@@ -127,58 +169,14 @@ _M.code = debug.getinfo(1).currentline
         RET.balance = (free_balance) / 1000000000000 
         RET.balanceTotal = (free_balance) / 1000000000000
         RET.balanceLocking = lock_balance / 1000000000000
-        RET.balanceUsable = free_balance / 1000000000000
+        RET.balanceUsable = (free_balance - lock_balance) / 1000000000000
         RET.pledged = false
         if lock_balance ~= 0 then
             RET.pledged = true
         end 
     end
-
-    if true then
-        local res, err = httpc:request_uri(string.format("https://polkascan.io/kusama-cc2/api/v1/extrinsic?&filter[address]=%s&page[size]=25",addr), {
-            method = "GET",
-            headers = config.CAMO_UA
-        })
-        if not res then
-            return {error = "internal error."}
-        end
-        local ret = cjson.decode(res.body)
-        for _, item in pairs(ret.data) do
-            if item.attributes.call_id == "nominate" then
-                if RET.nominated == nil then
-                    local param = item.attributes.params[1]
-                    RET.nominated = {}
-                    for _, obj in pairs(param.value) do
-                        node = {short_address = "", alias = ""}
-                        if true then
-                            local res, err = ihttpc:get("http://47.96.84.173:8088/getNickName/"..obj.value)
-                            local result_obj = cjson.decode(res)
-                            if result_obj.statusCode == 200 then
-                                node.alias = str2hex(string.sub(result_obj.object,3))
-                            end
-                        end
-                        if true then 
-                            local res, err = ihttpc:get(string.format("https://polkascan.io/kusama-cc2/api/v1/account/%s?include=indices",obj.value))
-                            local result_obj = cjson.decode(res)
-                            if not res then
-                                RET.warning = "request ".. obj.value .. " error."
-                            end
-                            if #result_obj.included ~= 0 then
-                                node.short_address = result_obj.included[1].id
-                            else
-                                node.short_address = ""
-                            end
-                        end
-                        node.address = obj.value
-                        table.insert(RET.nominated, node)
-                    end
-                end
-            elseif item.attributes.call_id == "bond" or item.attributes.call_id == "bond_extra" then
-                RET.bond_txs = {}
-                table.insert(RET.bond_txs, item)
-            end
-        end
-    end
+    -- nominated\bond_txs
+    get_txs(addr)
 
     RET.recentFunding = 0--get_24_hour(addr)
     RET.shortAddress = short_address
