@@ -23,6 +23,7 @@ end
 
 function _M.main()
 --local detail = {}
+RET = {}
 _M.code = debug.getinfo(1).currentline
     local res, err = httpc:get("https://explorer.lambdastorage.com/api/validator/validatorList?type=0&status=0")
     local ok = string.find(res,"<html>")

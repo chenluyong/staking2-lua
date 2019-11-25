@@ -34,6 +34,7 @@ end
 function _M.main()
 --local detail = {}
 _M.code = debug.getinfo(1).currentline 
+RET = {}
     local res, err = httpc:get("https://polkascan.io/kusama-cc2/api/v1/session/validator?filter%5BlatestSession%5D=true&page%5Bsize%5D=100")
 --    local ok = string.find(res,"<html>")
 

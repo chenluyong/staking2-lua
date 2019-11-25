@@ -125,7 +125,11 @@ end
 
 
 function _M.main()
-    return get_producers(ngx.var.request_uri)    
+RET = {}
+_M.code = debug.getinfo(1).currentline
+    RET = get_producers(ngx.var.request_uri)
+_M.code = 0
+    return RET    
 end
 
 

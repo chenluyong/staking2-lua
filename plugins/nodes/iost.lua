@@ -75,6 +75,8 @@ end
 
 
 function _M.main()
+RET = {}
+_M.code = debug.getinfo(1).currentline
     -- get nodes info
     args_len = #ngx.var.request_uri - #ngx.var.uri + 1
     local args = "?page=1&size=400&sort_by=votes&order=desc&search="
@@ -82,7 +84,7 @@ function _M.main()
         args = string.sub(ngx.var.request_uri, #ngx.var.uri + 1, #ngx.var.request_uri)
     end
     local ret_table = get_producers(args)
-
+_M.code = 0
     return convert(ret_table)
 end
 

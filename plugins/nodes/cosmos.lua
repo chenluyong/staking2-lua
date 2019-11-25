@@ -50,7 +50,7 @@ end
 
 function _M.main()
 _M.code = debug.getinfo(1).currentline
-
+RET = {}
     local res, err = httpc:get("https://api.cosmostation.io/v1/staking/validators")
     if not res then
         RET.error = "request failed"

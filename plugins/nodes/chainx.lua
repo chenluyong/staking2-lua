@@ -48,6 +48,8 @@ end
 
 function _M.main()
 --local detail = {}
+RET = {}
+_M.code = debug.getinfo(1).currentline
     local res, err = httpc:post(config.CHAINX_RPC, {
         headers = {['Content-Type'] = 'application/json'},
         body = cjson.encode({
@@ -137,6 +139,7 @@ function _M.main()
     end
     RET = convert(RET)
 --RET.detail = detail
+_M.code = 0
     return RET
 end
 

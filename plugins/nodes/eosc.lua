@@ -53,6 +53,8 @@ local function sort_by_vote(a, b)
 end
 
 function _M.main()
+RET = {}
+_M.code = debug.getinfo(1).currentline
     local res, err = httpc:post(config.EOSC_NODESINFO, {
         headers = {['Content-Type'] = 'application/json;charset=UTF-8'},
         body = cjson.encode({
@@ -117,6 +119,7 @@ function _M.main()
         end
         nodesinfo[i].rank = i
     end
+_M.code = 0
 --RET.detail = detail
 --RET.nodes = nodesinfo
 --    RET = nodesinfo

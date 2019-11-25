@@ -17,6 +17,8 @@ end
 
 
 function _M.main_vapor()
+RET = {}
+_M.code = debug.getinfo(1).currentline
     local res,err = httpc:request_uri(config.VAPOR_NODESINFO, {
         method = "GET",
         headers = config.CAMO_UA
@@ -74,7 +76,7 @@ function _M.main_vapor()
         table.insert(RET.nodes, info)
     end
 
-
+_M.code = 0
     return RET
 end
 
